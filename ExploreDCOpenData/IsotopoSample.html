@@ -1,0 +1,377 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+
+    <title>CodePen - Isotope - combination filters with a function</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: sans-serif;
+        }      
+
+        .button {
+            display: inline-block;
+            padding: 10px 18px;
+            margin-bottom: 10px;
+            background: #EEE;
+            border: none;
+            border-radius: 7px;
+            background-image: linear-gradient( to bottom, hsla(0, 0%, 0%, 0), hsla(0, 0%, 0%, 0.2) );
+            color: #222;
+            font-family: sans-serif;
+            font-size: 16px;
+            text-shadow: 0 1px white;
+            cursor: pointer;
+        }
+
+            .button:hover {
+                background-color: #8CF;
+                text-shadow: 0 1px hsla(0, 0%, 100%, 0.5);
+                color: #222;
+            }
+
+            .button:active,
+            .button.is-checked {
+                background-color: #28F;
+            }
+
+            .button.is-checked {
+                color: white;
+                text-shadow: 0 -1px hsla(0, 0%, 0%, 0.8);
+            }
+
+            .button:active {
+                box-shadow: inset 0 1px 10px hsla(0, 0%, 0%, 0.8);
+            }     
+
+        .button-group:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+
+        .button-group .button {
+            float: left;
+            border-radius: 0;
+            margin-left: 0;
+            margin-right: 1px;
+        }
+
+            .button-group .button:first-child {
+                border-radius: 0.5em 0 0 0.5em;
+            }
+
+            .button-group .button:last-child {
+                border-radius: 0 0.5em 0.5em 0;
+            }    
+
+        .grid {
+            border: 1px solid #333;
+        }
+            /* clear fix */
+            .grid:after {
+                content: '';
+                display: block;
+                clear: both;
+            }
+
+        /* ---- .element-item ---- */
+        .element-item {
+            position: relative;
+            float: left;
+            width: 300px;
+            height: 300px;
+            margin: 0px;
+            padding: 2px;
+            /*background: #888;*/
+            color: #262524;
+            border: 2px solid green;
+        }
+
+            .element-item > * {
+                margin: 0;
+                padding: 0;
+            }
+
+            .element-item .name {
+                position: absolute;
+                left: 10px;
+                top: 60px;
+                text-transform: none;
+                letter-spacing: 0;
+                font-size: 12px;
+                font-weight: normal;
+            }
+
+            .element-item .symbol {
+                position: absolute;
+                left: 10px;
+                top: 0px;
+                font-size: 42px;
+                font-weight: bold;
+                color: white;
+            }
+
+            .element-item .number {
+                position: absolute;
+                right: 8px;
+                top: 5px;
+            }
+
+            .element-item .weight {
+                position: absolute;
+                left: 10px;
+                top: 76px;
+                font-size: 12px;
+            }
+
+        .test {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            border: 0px solid red;
+            /*top: 20px;*/
+            z-index: -10;
+        }
+
+        object {
+            width: 100%;
+            min-height: 100%;
+        }
+
+        #div11 {
+            position: relative;
+            float: left;
+            width: 300px;
+            height: 300px;
+            margin: 5px;
+            padding: 2px;
+            /*background: #888;*/
+            color: #262524;
+            border: 2px solid green;
+        }
+
+        #divPage11 {
+            display: none;
+            border: 0px solid red;
+            /* z-index: -10; */
+        }
+
+        #div11 #divPage11 {
+            display: block;
+            border: 2px solid blue;
+            /* z-index: -10; */
+        }
+
+        #div11:hover #divPage11 {
+            display: block;
+            border: 2px solid red;
+            /*z-index: 10; */
+        }
+
+        .btnClass {
+            background-color: #4CAF50; /* Green */
+            width: 120px;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        #button-wrapper {
+            position: absolute;
+            top: 80px;
+            left: 80px;
+            margin: auto;
+            border: 0px solid red;
+        }
+
+        .element-item:hover {
+            border-color: hsla(0, 0%, 100%, 0.5);
+            border: 3px solid blue;
+            cursor: move;
+        }
+
+        .packery-drop-placeholder {
+            outline: 3px dashed hsla(0, 0%, 0%, 0.5);
+            outline-offset: -6px;
+            -webkit-transition: -webkit-transform 0.2s;
+            transition: transform 0.2s;
+        }
+
+        .element-item .wraper1 {
+            display: none;
+        }
+
+        .element-item:hover .wraper1 {
+            display: block;
+            border: 0px solid red;
+        }
+    </style>
+
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js'></script>
+    <script src='//npmcdn.com/isotope-layout@3/dist/isotope.pkgd.js'></script>
+
+    <script src="http://draggabilly.desandro.com/draggabilly.pkgd.js"></script>
+    <script src="http://packery.metafizzy.co/packery.pkgd.js"></script>
+</head>
+
+<body translate="no">
+
+    <h1></h1>
+
+    <div class="button-group filters-button-group">
+        <h3>Technologies</h3>
+        <button class="button is-checked" data-filter="*">show all</button>
+        <button class="button" data-filter=".mapbox">Mapbox JS</button>
+        <button class="button" data-filter=".d3">D3.js</button>
+        <button class="button" data-filter=".google">Google Maps API</button>
+        <button class="button" data-filter=".arcgis">ArcGIS JavaScript API</button>
+        <button class="button" data-filter=".leaflet">Leaflet</button>
+    </div>
+    <div>
+        <h3>Search by Keyword</h3>
+        <div class="input-group">
+            <input type="text" class="form-control" id="geoJsonUrl" value=" " placeholder="search open data  ">
+            <span class="input-group-btn">
+                <button id="btnSearch" class="btn btn-success" type="button">Search</button>
+            </span>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div id="divPageA" class="element-item transition leaflet " data-category="transition">
+            <div id="divPage1" class="test"></div>
+        </div>
+        <div id="divPageB" class="element-item mapbox " data-category="metalloid">
+            <div id="divPage2" class="test"></div>
+        </div>
+        <div id="divPageC" class="element-item post-transition mapbox" data-category="post-transition">
+            <div id="divPage3" class="test"></div>
+        </div>
+        <div id="divPageD" class="element-item alkali mapbox d3 " data-category="alkali">
+            <div id="divPage4" class="test"></div>
+        </div>
+        <div id="divPageE" class="element-item transition arcgis " data-category="transition">
+            <div id="divPage5" class="test"></div>
+        </div>
+        <div id="divPageF" class="element-item alkaline-earth google " data-category="alkaline-earth">
+            <div id="divPage6" class="test"></div>
+            <div id="button-wrapper" class="wraper1">
+                <div>
+                    <input type="button" id="btnShare" value="Share" class="btnClass" />
+                </div>
+                <div>
+                    <input type="button" id="btnEmbed" value="Embed" class="btnClass" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // init Isotope
+        var $grid = $('.grid').isotope({
+            itemSelector: '.element-item',
+            layoutMode: 'fitRows'
+        });
+        // filter functions
+        var filterFns = {
+            // show if number is greater than 50
+            numberGreaterThan50: function () {
+                var number = $(this).find('.number').text();
+                return parseInt(number, 10) > 50;
+            },
+            // show if name ends with -ium
+            ium: function () {
+                var name = $(this).find('.name').text();
+                return name.match(/ium$/);
+            }
+        };
+        // bind filter button click
+        $('.filters-button-group').on('click', 'button', function () {
+            var filterValue = $(this).attr('data-filter');
+            // use filterFn if matches value
+            filterValue = filterFns[filterValue] || filterValue;
+            $grid.isotope({ filter: filterValue });
+        });
+        // change is-checked class on buttons
+        $('.button-group').each(function (i, buttonGroup) {
+            var $buttonGroup = $(buttonGroup);
+            $buttonGroup.on('click', 'button', function () {
+                $buttonGroup.find('.is-checked').removeClass('is-checked');
+                $(this).addClass('is-checked');
+            });
+        });
+
+        $("#divPage1").html('<object data="http://testapps02.dcgis.in.dc.gov/exploreDCopendata/dcward.html" />');
+
+        $("#divPage2").html('<object data="http://testapps02.dcgis.in.dc.gov/exploreDCopendata/DCPublicSchools.htm" />');
+
+        $("#divPage3").html('<object data="http://testapps02.dcgis.in.dc.gov/exploreDCopendata/DCPoliceStations.html" />');
+
+        $("#divPage4").html('<object data="http://testapps02.dcgis.in.dc.gov/exploreDCopendata/DCCapitalBikeShareLocations.html" />');
+
+        $("#divPage5").html('<object data="http://testapps02.dcgis.in.dc.gov/exploreDCopendata/DCCensusTracts_V2.html" />');
+
+        $("#divPage6").html('<object data="http://testapps02.dcgis.in.dc.gov/exploreDCopendata/DCCensusTractsbyPopulation.html" />');
+
+        $('#btnSearch').click(function () {
+            var filterValue = "." + $("#geoJsonUrl").val().trim();
+            $grid.isotope({ filter: filterValue });
+        });
+
+        $('#btnShare').click(function () {
+            console.log("click share");
+
+            // Create an auxiliary hidden input
+            var aux = document.createElement("input");
+
+            // Get the text from the element passed into the input
+            // aux.setAttribute("value", value);
+            aux.setAttribute("value", "htp://4371/isotopo_5_filter.html");
+
+            // Append the aux input to the body
+            document.body.appendChild(aux);
+
+            // Highlight the content
+            aux.select();
+
+            // Execute the copy command
+            document.execCommand("copy");
+
+            // Remove the input from the body
+            document.body.removeChild(aux);
+        });
+
+        $('#btnEmbed').click(function () {
+            console.log("click embed");
+        });
+
+        var $grid = $('.grid').packery({
+            itemSelector: '.element-item',
+            columnWidth: 100
+        });
+
+        // make all grid-items draggable
+        $grid.find('.element-item').each(function (i, gridItem) {
+            var draggie = new Draggabilly(gridItem);
+            // bind drag events to Packery
+            $grid.packery('bindDraggabillyEvents', draggie);
+        });
+    </script>
+
+</body>
+</html>

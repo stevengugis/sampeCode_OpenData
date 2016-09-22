@@ -1,0 +1,307 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8 />
+  <title>DC Public Schools</title>
+  <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet'>
+  <script src='https://api.tiles.mapbox.com/mapbox.js/v2.2.2/mapbox.js'></script>
+  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <link href='https://api.tiles.mapbox.com/mapbox.js/v2.2.2/mapbox.css' rel='stylesheet' />
+  <style>
+  body {
+    color:#404040;
+    font:400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+    margin:0;
+    padding:0;
+    -webkit-font-smoothing:antialiased;
+  }
+  * {
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing:border-box;
+    box-sizing:border-box;
+  }
+  h1 {
+    font-size:22px;
+    margin:0;
+    font-weight:400;
+  }
+  a {
+    color:#404040;
+    text-decoration:none;
+  }
+  a:hover { color:#101010; }
+
+  .sidebar {
+    position:absolute;
+    width:25%;
+    height:100%;
+    top:0;left:0;
+    overflow:hidden;
+    border-right:1px solid rgba(0,0,0,0.25);
+  }
+  .pad2 {
+    padding:20px;
+  }
+  .quiet {
+    color:#888;
+  }
+  .map {
+    position:absolute;
+    left:25%;
+    width:75%;
+    top:0;bottom:0;
+  }
+  .heading {
+    background:#fff;
+    border-bottom:1px solid #eee;
+    height:60px;
+    line-height:60px;
+    padding:0 10px;
+  }
+  .listings {
+    height:100%;
+    overflow:auto;
+    padding-bottom:60px;
+  }
+  .listings .item {
+    display:block;
+    border-bottom:1px solid #eee;
+    padding:10px;
+    text-decoration:none;
+  }
+  .listings .item:last-child { border-bottom:none; }
+  .listings .item .title {
+    display:block;
+    color:#00853e;
+    font-weight:700;
+  }
+  .listings .item .title small { font-weight:400; }
+  .listings .item.active .title,
+  .listings .item .title:hover { color:#8cc63f; }
+  .listings .item.active {
+    background-color:#f8f8f8;
+  }
+
+  ::-webkit-scrollbar {
+    width:3px;
+    height:3px;
+    border-left:0;
+    background:rgba(0,0,0,0.1);
+  }
+  ::-webkit-scrollbar-track {
+    background:none;
+  }
+  ::-webkit-scrollbar-thumb {
+    background:#00853e;
+    border-radius:0;
+  }
+
+  .clearfix { display:block; }
+  .clearfix:after {
+    content:'.';
+    display:block;
+    height:0;
+    clear:both;
+    visibility:hidden;
+  }
+
+  /* Marker tweaks */
+  .leaflet-popup-close-button {
+    display:none;
+  }
+  .leaflet-popup-content {
+    font:400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+    padding:0;
+    width:200px;
+  }
+  .leaflet-popup-content-wrapper {
+    padding:0;
+  }
+  .leaflet-popup-content h3 {
+    background:#91c949;
+    color:#fff;
+    margin:0;
+    display:block;
+    padding:10px;
+    border-radius:3px 3px 0 0;
+    font-weight:700;
+    margin-top:-15px;
+  }
+  .leaflet-popup-content div {
+    padding:10px;
+  }
+  .leaflet-container .leaflet-marker-icon { cursor:pointer; }
+  </style>
+    <style>
+        .childbox1 {
+            font: 28px/1 Arial, sans-serif;
+            padding: 12px;
+            border: 0px solid black;
+            margin: 0px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFF;
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+
+        .childbox2 {
+            padding: 0px;
+            margin-left: 10px;
+            color: #FFF;
+            font-weight: normal;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            border: solid 0px red;
+        }
+
+        .map-overlay2 {
+            position: relative;
+            padding: 5px;
+            margin: auto;
+            width: 45%;
+            border-radius: 5px;
+            z-index: 300;
+            background-color: #50667f;
+            opacity: 0.8;
+        }
+
+        a:link {
+            color: white;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+
+        a:visited {
+            color: yellow;
+            background-color: transparent;
+            text-decoration: none;
+        }
+
+        a:hover {
+            font-weight: bold;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+    </style>
+
+</head>
+<body>
+  <div class='sidebar'>
+    <div class='heading'>
+      <h1>School locations</h1>
+    </div>
+    <div id='listings' class='listings'></div>
+  </div>
+    <div id='map' class='map'>
+        <div class='map-overlay2'>
+            <div id="title" class="childbox1">
+            </div>
+            <div id="subtitle1" class="childbox2">
+            </div>
+            <div id="subtitle2" class="childbox2">
+            </div>
+            <div id="subtitle3" class="childbox2">
+            </div>
+        </div>
+    </div>
+  <script>
+      //add title
+      var geojson_url = "http://opendata.dc.gov/datasets/4ac321b2d409438ebd76a6569ad94034_5.geojson";
+      var dataSource_url = "http://opendata.dc.gov/datasets/4ac321b2d409438ebd76a6569ad94034_5";
+      var instruction = "Instructions:Click link on left to move map to selected school or select a school to display information.";
+
+      $('#title').text("DC Public Schools");
+
+      $('#subtitle1').html('<a id="a1" >Geojson API</a>');
+      $("#a1").attr("href", geojson_url);
+      $("#a1").attr('title', geojson_url);
+
+      $('#subtitle2').html('<a id="a2" >Data Source</a>');
+      $("#a2").attr("href", dataSource_url);
+      $("#a2").attr('title', dataSource_url);
+
+      $('#subtitle3').text(instruction);
+
+      L.mapbox.accessToken = 'pk.eyJ1Ijoic2d1MiIsImEiOiJjaW5obHQ5d3AwdnljdWtseXlmOGMwNThtIn0.eQMN4cP3iMaw1W_vptvOLQ';
+
+      var geojson2 = [];
+
+      var map = L.mapbox.map('map', 'mapbox.k8xv42t9').setView([38.909671288923, -77.034084142948], 12);
+      //var featureLayer = L.mapbox.featureLayer().loadURL('Primary_Care_Centers.geojson').addTo(map);
+
+      var listings = document.getElementById('listings');
+      var locations = L.mapbox.featureLayer().addTo(map);
+
+      function setActive(el) {
+          var siblings = listings.getElementsByTagName('div');
+          for (var i = 0; i < siblings.length; i++) {
+              siblings[i].className = siblings[i].className
+      .replace(/active/, '').replace(/\s\s*$/, '');
+          }
+
+          el.className += ' active';
+      }
+
+      $.getJSON(geojson_url, function (data) {
+          console.log("got geojson data");
+          geojson2.push(data);
+          locations.setGeoJSON(geojson2);
+
+          locations.eachLayer(function (locale) {
+              var prop = locale.feature.properties;
+              var popup = '<h3>' + prop.NAME + '</h3><div>';
+
+              var listing = listings.appendChild(document.createElement('div'));
+              listing.className = 'item';
+
+              var link = listing.appendChild(document.createElement('a'));
+              link.href = '#';
+              link.className = 'title';
+
+              link.innerHTML = prop.NAME;
+
+              link.innerHTML += '<br /><small class="quiet">' + prop.ADDRESS + '</small>';
+              link.innerHTML += '<br /><small class="quiet">' + prop.PHONE + '</small>';
+              link.innerHTML += '<br /><small class="quiet">' + prop.FACUSE + '</small>';
+
+              popup += '<br /><small class="quiet">' + prop.ADDRESS + '</small>';
+              popup += '<br /><small class="quiet">' + prop.PHONE + '</small>';
+
+              var details = listing.appendChild(document.createElement('div'));
+
+              link.onclick = function () {
+                  setActive(listing);
+
+                  // When a menu item is clicked, animate the map to center
+                  // its associated locale and open its popup.
+                  map.setView(locale.getLatLng(), 16);
+                  locale.openPopup();
+                  return false;
+              };
+
+              // Marker interaction
+              locale.on('click', function (e) {
+                  // 1. center the map on the selected marker.
+                  map.panTo(locale.getLatLng());
+
+                  // 2. Set active the markers associated listing.
+                  setActive(listing);
+              });
+
+              popup += '</div>';
+              locale.bindPopup(popup);
+
+              locale.setIcon(L.icon({
+                  iconUrl: 'images/school.png',
+                  iconSize: [25, 25],
+                  iconAnchor: [28, 28],
+                  popupAnchor: [-10, -20]
+              }));
+
+          });
+      });
+
+</script>
+</body>
+</html>

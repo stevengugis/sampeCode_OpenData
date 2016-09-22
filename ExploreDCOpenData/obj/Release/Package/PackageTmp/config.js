@@ -1,0 +1,12 @@
+﻿
+var token_DCCrimeIncidents_V2 = 'pk.eyJ1Ijoic2d1MiIsImEiOiJjaW5obHQ5d3AwdnljdWtseXlmOGMwNThtIn0.eQMN4cP3iMaw1W_vptvOLQ';
+
+var token_DCCrimeIncidents = 'pk.eyJ1Ijoic2d1MiIsImEiOiJjaW5obHQ5d3AwdnljdWtseXlmOGMwNThtIn0.eQMN4cP3iMaw1W_vptvOLQ';
+
+var token_DCCapitalBikeShareLocations = 'pk.eyJ1IjoiaGV5aXRzZ2FycmV0dCIsImEiOiIwdWt5ZlpjIn0.73b7Y47rgFnSD7QCNeS-zA';
+
+var token_DCFindSidewalkCafe = 'pk.eyJ1IjoibW9yZ2FuaGVybG9ja2VyIiwiYSI6Ii1zLU4xOWMifQ.FubD68OEerk74AYCLduMZQ';
+
+var token_DCPoliceStations = 'pk.eyJ1IjoibW9yZ2FuaGVybG9ja2VyIiwiYSI6Ii1zLU4xOWMifQ.FubD68OEerk74AYCLduMZQ';
+
+var token_DCPublicSchools = 'pk.eyJ1Ijoic2d1MiIsImEiOiJjaW5obHQ5d3AwdnljdWtseXlmOGMwNThtIn0.eQMN4cP3iMaw1W_vptvOLQ';

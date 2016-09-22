@@ -1,0 +1,277 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Census Tracts by Median Income</title>
+    <meta charset="utf-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <style>
+       .map-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 50px;
+            background: rgba(255, 255, 255, 0.8);
+            margin-left: 50px;
+            font-family: Arial, sans-serif;
+            overflow: auto;
+            border-radius: 3px;
+        }
+            #map {
+            position:absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+             #features {
+            top: 5px;
+            left: 20px;
+            height: 80px;
+            margin-top: 20px;
+            margin-right: 20px;
+            width: 600px;
+        }
+
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+
+            .info h4 {
+                margin: 0 0 5px;
+                color: #777;
+            }
+
+        .legend {
+            text-align: left;
+            line-height: 18px;
+            color: #555;
+        }
+
+            .legend i {
+                width: 18px;
+                height: 18px;
+                float: left;
+                margin-right: 8px;
+                opacity: 0.7;
+            }
+    </style>
+    <style>
+        .childbox1 {
+            font: 28px/1 Arial, sans-serif;
+            padding: 12px;
+            border: 0px solid black;
+            margin: 0px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFF;
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+
+        .childbox2 {
+            padding: 0px;
+            margin-left: 10px;
+            color: #FFF;
+            font-weight: normal;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            border: solid 0px red;
+        }
+
+        .map-overlay2 {
+            position: relative;
+            padding: 5px;
+            margin: auto;
+            width: 40%;
+            border-radius: 5px;
+            z-index: 300;
+            background-color: #50667f;
+            opacity: 0.8;
+        }
+
+        a:link {
+            color: white;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+
+        a:visited {
+            color: yellow;
+            background-color: transparent;
+            text-decoration: none;
+        }
+
+        a:hover {
+            font-weight: bold;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="map">
+        <div class='map-overlay2'>
+            <div id="title" class="childbox1">
+            </div>
+            <div id="subtitle1" class="childbox2">
+            </div>
+            <div id="subtitle2" class="childbox2">
+            </div>
+            <div id="subtitle3" class="childbox2">
+            </div>
+        </div>
+    </div>
+    <!--<div class='map-overlay' id="features"><h1>   Census Tracts by Median Income </h1></div>-->
+    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+
+    <script type="text/javascript" src="us-states.js"></script>
+    <script type="text/javascript">
+        var geojson_url = "http://opendata.dc.gov/datasets/b78d164649ad487db0f2b20a9261fb8c_17.geojson";
+        var dataSource_url = "http://opendata.dc.gov/datasets/b78d164649ad487db0f2b20a9261fb8c_17";
+        var instruction = "Instructions: Scroll over census tracts for more information.";
+
+        $('#title').text("DC Census Tracts by Median Income");
+
+        $('#subtitle1').html('<a id="a1" >Geojson API</a>');
+        $("#a1").attr("href", geojson_url);
+        $("#a1").attr('title', geojson_url);
+
+        $('#subtitle2').html('<a id="a2" >Data Source</a>');
+        $("#a2").attr("href", dataSource_url);
+        $("#a2").attr('title', dataSource_url);
+
+        $('#subtitle3').text(instruction);
+
+        var map = L.map('map').setView([38.8929, -77.0252], 12);
+
+        var baseTiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+            id: 'mapbox.light'
+        });
+
+        baseTiles.addTo(map);
+
+		// control that shows state info on hover
+		var info = L.control();
+
+		info.onAdd = function (map) {
+			this._div = L.DomUtil.create('div', 'info');
+			this.update();
+			return this._div;
+		};
+
+		info.update = function (props) {
+		    this._div.innerHTML =  (props ?
+				 'Tract: ' + props.NAME + '<br>Median Income: ' + props.FAGI_MEDIAN_2006
+				: 'Hover over a tract');
+		};
+
+		info.addTo(map);
+
+		function getColor(p) {
+		    console.log("NUmber is: " + p);
+		    return p >= 100000 ? '#800026' :
+                   p >= 80000 && p <= 100000 ? '#BD0026' :
+                   p >= 50000 && p <= 80000 ? '#E31A1C' :
+                   p >= 30000 && p <= 50000 ? '#FC4E2A' :
+                   p >= 20000 && p <= 30000 ? '#FD8D3C' :
+                    '#FFEDA0';
+		}
+
+		function setStyle(feature) {
+			return {
+				weight: 2,
+				opacity: 1,
+				color: 'white',
+				dashArray: '3',
+				fillOpacity: 0.5,
+				fillColor: getColor(feature.properties.FAGI_MEDIAN_2006)
+			};
+		}
+
+		function highlightFeature(e) {
+			var layer = e.target;
+
+			layer.setStyle({
+				weight: 5,
+				color: '#2262CC',
+				dashArray: '',
+				fillColor: '#2262CC',
+				fillOpacity: 0.7
+			});
+
+			if (!L.Browser.ie && !L.Browser.opera) {
+				layer.bringToFront();
+			}
+
+			info.update(layer.feature.properties);
+		}
+
+		var geojson;
+
+		function resetHighlight(e) {
+			geojson.resetStyle(e.target);
+			info.update();
+		}
+
+		function zoomToFeature(e) {
+			map.fitBounds(e.target.getBounds());
+		}
+
+		function onEachFeature(feature, layer) {
+			layer.on({
+				mouseover: highlightFeature,
+				mouseout: resetHighlight,
+				click: zoomToFeature
+			});
+		}
+
+		$.getJSON(geojson_url, function (data) {
+		    geojson = L.geoJson(data, {
+		        style: setStyle,
+		        onEachFeature: onEachFeature
+		    }).addTo(map);
+		});
+
+		map.attributionControl.addAttribution('Population data &copy; <a href="http://census.gov/">US Census Bureau</a>');
+
+
+		var legend = L.control({position: 'bottomright'});
+
+		legend.onAdd = function (map) {
+
+			var div = L.DomUtil.create('div', 'info legend'),
+                grades = [0, 20000, 30000, 50000, 80000, 100000],
+				labels = [],
+				from, to;
+
+			for (var i = 0; i < grades.length; i++) {
+				from = grades[i];
+				to = grades[i + 1];
+
+				labels.push(
+					'<i style="background:' + getColor(from + 1) + '"></i> ' +
+					from + (to ? '&ndash;' + to : '+'));
+			}
+
+			div.innerHTML = labels.join('<br>');
+			return div;
+		};
+
+		legend.addTo(map);
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>DC Crime Incidents - 2015</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="config.js"></script>
+    <link rel="shortcut icon" href="http://atlasplus.dcgis.dc.gov/images/dclogo.ico" />
+    <link rel="stylesheet" type="text/css" href="css/cluster_dash.css" />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id='map'></div>
+    <div class='map-overlay2'>
+        <div id="title" class="childbox1">
+        </div>
+        <div id="subtitle1" class="childbox2">
+        </div>
+        <div id="subtitle2" class="childbox2">
+        </div>
+        <div id="subtitle3" class="childbox2">
+        </div>
+    </div>
+    <div class='map-overlay top'>
+        <div class='map-overlay-inner'>
+            <h2>  DC Crime Incidents - 2015</h2>
+            <div id="download" class='blocker strong large pad0'>
+                Downloading crime data...
+            </div>
+            <label id='month'></label>
+            <input id='slider' type='range' min='0' max='11' step='1' value='0' />
+        </div>
+    </div>
+    <div id='legendDiv' class='legend'></div>
+    <div id="pieChart"></div>
+    <div id="barChart"></div>
+    <div id="lineChart"></div>
+    <script src='//d3js.org/d3.v3.min.js' charset='utf-8'></script>
+    <script type="text/javascript" src="js/opendta_cluster.js"></script>
+    <script type="text/javascript" src="js/opendata_dash.js"></script>
+</body>
+</html>

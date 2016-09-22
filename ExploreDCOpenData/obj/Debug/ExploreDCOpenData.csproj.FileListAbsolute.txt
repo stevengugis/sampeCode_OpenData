@@ -1,0 +1,6 @@
+c:\users\steven.gu\documents\visual studio 2013\Projects\ExploreDCOpenData\ExploreDCOpenData\bin\ExploreDCOpenData.dll.config
+c:\users\steven.gu\documents\visual studio 2013\Projects\ExploreDCOpenData\ExploreDCOpenData\bin\ExploreDCOpenData.dll
+c:\users\steven.gu\documents\visual studio 2013\Projects\ExploreDCOpenData\ExploreDCOpenData\bin\ExploreDCOpenData.pdb
+c:\users\steven.gu\documents\visual studio 2013\Projects\ExploreDCOpenData\ExploreDCOpenData\obj\Debug\ExploreDCOpenData.csprojResolveAssemblyReference.cache
+c:\users\steven.gu\documents\visual studio 2013\Projects\ExploreDCOpenData\ExploreDCOpenData\obj\Debug\ExploreDCOpenData.dll
+c:\users\steven.gu\documents\visual studio 2013\Projects\ExploreDCOpenData\ExploreDCOpenData\obj\Debug\ExploreDCOpenData.pdb

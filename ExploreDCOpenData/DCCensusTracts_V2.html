@@ -1,0 +1,276 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>DC Census Tract</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.17/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.17/esri/css/esri.css">
+    <style>
+        /*
+        html, body, #map {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        */
+         body {
+            margin: 0;
+            padding: 0;
+        }       
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .chart {
+            width: 200px;
+            height: 200px;
+            padding: 0px !important;
+        }
+    </style>
+    <style>
+        .childbox1 {
+            font: 24px/1 Arial, sans-serif;
+            padding: 5px;
+            border: 0px solid black;
+            margin: 0px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFF;
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+
+        .childbox2 {
+            padding: 0px;
+            margin-left: 10px;
+            color: #FFF;
+            font-weight: normal;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            border: solid 0px red;
+        }
+
+        .map-overlay2 {
+            position: relative;
+            padding: 5px;
+            margin: auto;
+            width: 40%;
+            border-radius: 5px;
+            z-index: 300;
+            background-color: #50667f;
+            opacity: 0.8;
+        }
+    </style>
+    <script src="https://js.arcgis.com/3.17/"></script>
+    <script src="http://esri.github.io/geojson-layer-js/vendor/terraformer/terraformer.min.js"></script>
+    <script src="http://esri.github.io/geojson-layer-js/vendor/terraformer-arcgis-parser/terraformer-arcgis-parser.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
+    <script>
+      var map;      
+      var theme = "Wetland";
+     // var dataSourceUrl = "http://opendata.dc.gov/datasets/6969dd63c5cb4d6aa32f15effb8311f3_8.geojson";
+
+      require([
+        "esri/map", "esri/layers/FeatureLayer",
+        "esri/dijit/InfoWindow", "esri/InfoTemplate",
+        "esri/symbols/SimpleFillSymbol", "esri/renderers/SimpleRenderer",
+        "dijit/layout/ContentPane", "dijit/layout/TabContainer",
+        "dojox/charting/Chart2D", "dojox/charting/plot2d/Pie",
+        "dojox/charting/action2d/Highlight", "dojox/charting/action2d/MoveSlice", "dojox/charting/action2d/Tooltip",
+        "dojox/charting/themes/" + theme,
+        "http://esri.github.io/geojson-layer-js/src/geojsonlayer.js",       
+         "esri/symbols/SimpleLineSymbol",
+          "esri/Color",
+        "dojo/dom-construct", "dojo/dom-class",
+        "dojo/number", "dojo/domReady!"
+      ], function(
+        Map, FeatureLayer,
+        InfoWindow, InfoTemplate,
+        SimpleFillSymbol, SimpleRenderer,
+        ContentPane, TabContainer,
+        Chart2D, Pie,
+        Highlight, MoveSlice, Tooltip,
+        dojoxTheme, GeoJsonLayer, SimpleLineSymbol, Color,
+        domConstruct, domClass,
+        number, parser
+      ) {
+          var geojson_url = "http://opendata.dc.gov/datasets/6969dd63c5cb4d6aa32f15effb8311f3_8.geojson";
+          var dataSource_url = "http://opendata.dc.gov/datasets/6969dd63c5cb4d6aa32f15effb8311f3_8";
+          var instruction = "Description: Click census tracts to check race info in text and pie chart.";
+
+          $('#title').text("Census Tracts - 2010");
+
+          $('#subtitle1').html('<a id="a1" >Geojson API</a>');
+          $("#a1").attr("href", geojson_url);
+          $("#a1").attr('title', geojson_url);
+
+          $('#subtitle2').html('<a id="a2" >Data Source</a>');
+          $("#a2").attr("href", dataSource_url);
+          $("#a2").attr('title', dataSource_url);
+
+          $('#subtitle3').text(instruction);
+
+        // Use the info window instead of the popup.
+        var infoWindow = new InfoWindow(null, domConstruct.create("div"));
+        infoWindow.startup();
+
+        map = new Map("map", {
+          basemap: "streets",
+          center: [-122.5, 45.5],
+          infoWindow: infoWindow,
+          zoom: 5
+        });
+        map.infoWindow.resize(275, 275);
+
+        map.on("load", function () {
+            addGeoJsonLayer(geojson_url);
+        });
+
+        var template = new esri.InfoTemplate();
+        // Flag icons are from http://twitter.com/thefella, released under creative commons.
+          //template.setTitle("<b><img src='flags/${STATE_ABBR}.png'>  ${STATE_NAME}</b>");
+        template.setTitle("<b>Census Tracts -  ${TRACT}</b>");
+        template.setContent(getWindowContent);     
+
+        function getWindowContent(graphic) {
+          // Make a tab container.
+          var tc = new TabContainer({
+            style: "width:100%;height:100%;"
+          }, domConstruct.create("div"));
+
+          // Display attribute information.
+          var cp1 = new ContentPane({
+            title: "Race Info",
+            content: "Total Population: " + graphic.attributes.P0010001 +
+                "<br>White: " + graphic.attributes.P0010003 +
+                "<br>Black: " + graphic.attributes.P0010004 +
+                "<br>American Indian: " + graphic.attributes.P0010005 +
+                "<br>Asian : " + graphic.attributes.P0010006 +
+                "<br>Hawaiian: " + graphic.attributes.P0010007 +
+                "<br>Other: " + graphic.attributes.P0010008
+          });
+          // Display a dojo pie chart for the male/female percentage.
+          var cp2 = new ContentPane({
+            title: "Pie Chart"
+          });
+          tc.addChild(cp1);
+          tc.addChild(cp2);
+
+          // Create the chart that will display in the second tab.
+          var c = domConstruct.create("div", {
+            id: "demoChart"
+          }, domConstruct.create("div"));
+          var chart = new Chart2D(c);
+          domClass.add(chart, "chart");
+
+          // Apply a color theme to the chart.
+          chart.setTheme(dojoxTheme);
+          chart.addPlot("default", {
+            type: "Pie",
+            radius: 80,
+            htmlLabels: true
+          });
+          tc.watch("selectedChildWidget", function(name, oldVal, newVal){
+            if ( newVal.title === "Pie Chart" ) {
+              chart.resize(180,180);
+            }
+          });
+
+          // Calculate percent male/female.
+          var total = graphic.attributes.P0010001;
+
+          var White = number.round(graphic.attributes.P0010003 / total * 100, 2);
+          var Black = number.round(graphic.attributes.P0010004/ total * 100, 2);
+          var American_Indian = number.round(graphic.attributes.P0010005 / total * 100, 2);
+          var Asian = number.round(graphic.attributes.P0010006 / total * 100, 2);
+          var Hawaiian = number.round(graphic.attributes.P0010007 / total * 100, 2);
+          var Other = number.round(graphic.attributes.P0010008 / total * 100, 2);
+
+          chart.addSeries("PopulationSplit",
+              [{
+              y: White,
+              tooltip: "White " + White + "%",
+              text: "White"
+          },
+          {
+              y: Black,
+              tooltip: "Black " + Black + "%",
+              text: "Black"
+          },
+          {
+              y: American_Indian,
+              tooltip: "American_Indian " + American_Indian + "%",
+              text: "American_Indian"
+          },
+          {
+              y: Asian,
+              tooltip: "Asian " + Asian + "%",
+              text: "Asian"
+          },
+          {
+              y: Hawaiian,
+              tooltip: "Hawaiian " + Hawaiian + "%",
+              text: "Hawaiian"
+          },
+          {
+              y: Other,
+              tooltip: "Other " + Other + "%",
+              text: "Other"
+          }
+              ]);
+
+          //highlight the chart and display tooltips when you mouse over a slice.
+          new Highlight(chart, "default");
+          new Tooltip(chart, "default");
+          new MoveSlice(chart, "default");
+
+          cp2.set("content", chart.node);
+          return tc.domNode;
+        }
+
+        function addGeoJsonLayer(url) {
+            // Create the layer
+            var geoJsonLayer = new GeoJsonLayer({
+                url: url,
+                //infoTemplate: template,
+                maxdraw: 10000
+            });
+
+            geoJsonLayer.setInfoTemplate(template);
+
+            geoJsonLayer._simplePolygonSym = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([0, 102, 153, 0.9]), 1), new Color([150, 255, 150, 0.2]));
+
+            // Zoom to layer
+            geoJsonLayer.on("update-end", function (e) {
+                map.setExtent(e.target.extent.expand(1.2));
+            });
+            // Add to map
+            map.addLayer(geoJsonLayer);
+
+        }
+      });
+    </script>
+</head>
+
+<body class="claro">
+    <div id="map"></div>
+    <div class='map-overlay2'>
+        <div id="title" class="childbox1">
+        </div>
+        <div id="subtitle1" class="childbox2">
+        </div>
+        <div id="subtitle2" class="childbox2">
+        </div>
+        <div id="subtitle3" class="childbox2">
+        </div>
+    </div>
+</body>
+</html>

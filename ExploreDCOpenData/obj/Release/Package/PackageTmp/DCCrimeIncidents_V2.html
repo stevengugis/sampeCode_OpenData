@@ -1,0 +1,737 @@
+﻿<!DOCTYPE html>
+<head>
+    <meta charset='utf-8' />
+    <title>DC Crime Incidents </title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.18.0/mapbox-gl.js'></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.18.0/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="DCCrimeTree.js"></script>
+    <script src="config.js"></script>
+    <link rel="polygon" type="application/json" href="http://opendata.dc.gov/datasets/0ef47379cbae44e88267c01eaec2ff6e_31.geojson">
+    <style>
+        .node {
+            cursor: pointer;
+        }
+
+            .node circle {
+                fill: #fff;
+                stroke: steelblue;
+                stroke-width: 1.5px;
+            }
+
+            .node text {
+                font: 10px sans-serif;
+            }
+
+        .link {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: 1.5px;
+        }
+    </style>
+    <style>
+        body {
+            color: #404040;
+            font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin: 0;
+            font-weight: 400;
+        }
+
+        a {
+            color: #404040;
+            text-decoration: none;
+        }
+
+            a:hover {
+                color: #101010;
+            }
+
+        .sidebar {
+            position: absolute;
+            width: 700px;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            border-right: 1px solid rgba(0,0,0,0.25);
+            border: 0px solid blue;
+            z-index: 300;
+        }
+
+        .pad2 {
+            padding: 20px;
+        }
+
+        .quiet {
+            color: #888;
+        }
+
+        .map {
+            position: absolute;
+            right: 0;
+            /*width: 50%;*/
+            top: 0;
+            bottom: 0;
+            border: 0px solid red;
+        }
+
+        .heading {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            height: 60px;
+            line-height: 60px;
+            padding: 0 10px;
+        }
+
+        .listings {
+            height: 100%;
+            overflow: auto;
+            padding-bottom: 60px;
+        }
+
+            .listings .item {
+                display: block;
+                border-bottom: 1px solid #eee;
+                padding: 10px;
+                text-decoration: none;
+            }
+
+                .listings .item:last-child {
+                    border-bottom: none;
+                }
+
+                .listings .item .title {
+                    display: block;
+                    color: #00853e;
+                    font-weight: 700;
+                }
+
+                    .listings .item .title small {
+                        font-weight: 400;
+                    }
+
+                    .listings .item.active .title,
+                    .listings .item .title:hover {
+                        color: #8cc63f;
+                    }
+
+                .listings .item.active {
+                    background-color: #f8f8f8;
+                }
+
+        ::-webkit-scrollbar {
+            width: 3px;
+            height: 3px;
+            border-left: 0;
+            background: rgba(0,0,0,0.1);
+        }
+
+        ::-webkit-scrollbar-track {
+            background: none;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00853e;
+            border-radius: 0;
+        }
+
+        .clearfix {
+            display: block;
+        }
+
+            .clearfix:after {
+                content: '.';
+                display: block;
+                height: 0;
+                clear: both;
+                visibility: hidden;
+            }
+
+        /* Marker tweaks */
+        .leaflet-popup-close-button {
+            display: none;
+        }
+
+        .leaflet-popup-content {
+            font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+            padding: 0;
+            width: 200px;
+        }
+
+        .leaflet-popup-content-wrapper {
+            padding: 0;
+        }
+
+        .leaflet-popup-content h3 {
+            background: #91c949;
+            color: #fff;
+            margin: 0;
+            display: block;
+            padding: 10px;
+            border-radius: 3px 3px 0 0;
+            font-weight: 700;
+            margin-top: -15px;
+        }
+
+        .leaflet-popup-content div {
+            padding: 10px;
+        }
+
+        .leaflet-container .leaflet-marker-icon {
+            cursor: pointer;
+        }
+    </style>
+    <style>
+        .childbox1 {
+            font: 28px/1 Arial, sans-serif;
+            padding: 12px;
+            border: 0px solid black;
+            margin: 0px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFF;
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+
+        .childbox2 {
+            padding: 0px;
+            margin-left: 10px;
+            color: #FFF;
+            font-weight: normal;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            border: solid 0px red;
+        }
+
+        .map-overlay2 {
+            position: absolute;
+            padding: 5px;
+            margin: auto;
+            width: 50%;
+            border-radius: 5px;
+            z-index: 300;
+            background-color: #50667f;
+            opacity: 0.8;
+            left:25%;
+        }
+
+        a:link {
+            color: white;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+
+        a:visited {
+            color: yellow;
+            background-color: transparent;
+            text-decoration: none;
+        }
+
+        a:hover {
+            font-weight: bold;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div id='tree' class="sidebar"></div>
+    <div id='map' class='map'>
+        <div class='map-overlay2'>
+            <div id="title" class="childbox1">
+            </div>
+            <div id="subtitle1" class="childbox2">
+            </div>
+            <div id="subtitle2" class="childbox2">
+            </div>
+            <div id="subtitle3" class="childbox2">
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        var height2 = window.innerHeight;
+        var width2 = window.innerWidth / 3;
+        var maxLabel = 120;
+
+        var w = $(window).width() - 600;
+        $("#map").css('width', w);
+
+        $(window).resize(function () {
+            var w = $(window).width() - 600;
+            $("#map").css('width', w);
+            console.log("browswer width = " + window.innerWidth + "px");
+            console.log("map width = " + $("#map").width());
+        });
+
+        var i = 0,
+            duration = 750,
+            root;
+
+        var tree = d3.layout.tree()
+            .size([height2, width2]);
+
+        var diagonal = d3.svg.diagonal()
+            .projection(function (d) { return [d.y, d.x]; });
+
+        var svg = d3.select("#tree").append("svg")
+             .attr("width", "100%")
+             .attr("height", height2)
+             .append("g")
+             .attr("transform", "translate(" + maxLabel + ", 0)");
+
+        $(document).ready(function () {
+            root = flare;
+            root.x0 = height2 / 2;
+            root.y0 = 0;
+
+            function collapse(d) {
+                if (d.children) {
+                    d._children = d.children;
+                    d._children.forEach(collapse);
+                    d.children = null;
+                }
+            }
+
+            root.children.forEach(collapse);
+            update(root);
+        });
+
+        d3.select(self.frameElement).style("height", "100%");
+
+        function update(source) {
+            // Compute the new tree layout.
+            var nodes = tree.nodes(root).reverse(),
+                links = tree.links(nodes);
+
+            // Normalize for fixed-depth.
+            nodes.forEach(function (d) { d.y = d.depth * 120; });
+
+            // Update the nodes…
+            var node = svg.selectAll("g.node")
+                .data(nodes, function (d) { return d.id || (d.id = ++i); });
+
+            // Enter any new nodes at the parent's previous position.
+            var nodeEnter = node.enter().append("g")
+                .attr("class", "node")
+                .attr("transform", function (d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+                .on("click", click);
+
+            nodeEnter.append("circle")
+                .attr("r", 1e-6)
+                .style("fill", function (d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+            nodeEnter.append("text")
+                .attr("x", function (d) { return d.children || d._children ? -10 : 10; })
+                .attr("dy", ".35em")
+                .attr("text-anchor", function (d) { return d.children || d._children ? "end" : "start"; })
+                .text(function (d) {
+                    if (d.size == undefined) {
+                        return d.name;
+                    }
+                    else {
+                        return d.name;
+                    }
+                })
+                .style("fill-opacity", 1e-6);
+
+            // Transition nodes to their new position.
+            var nodeUpdate = node.transition()
+                .duration(duration)
+                .attr("transform", function (d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+            nodeUpdate.select("circle")
+                .attr("r", 4.5)
+                .style("fill", function (d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+            nodeUpdate.select("text")
+                .style("fill-opacity", 1);
+
+            // Transition exiting nodes to the parent's new position.
+            var nodeExit = node.exit().transition()
+                .duration(duration)
+                .attr("transform", function (d) { return "translate(" + source.y + "," + source.x + ")"; })
+                .remove();
+
+            nodeExit.select("circle")
+                .attr("r", 1e-6);
+
+            nodeExit.select("text")
+                .style("fill-opacity", 1e-6);
+
+            // Update the links…
+            var link = svg.selectAll("path.link")
+                .data(links, function (d) { return d.target.id; });
+
+            // Enter any new links at the parent's previous position.
+            link.enter().insert("path", "g")
+                .attr("class", "link")
+                .attr("d", function (d) {
+                    var o = { x: source.x0, y: source.y0 };
+                    return diagonal({ source: o, target: o });
+                });
+
+            // Transition links to their new position.
+            link.transition()
+                .duration(duration)
+                .attr("d", diagonal);
+
+            // Transition exiting nodes to the parent's new position.
+            link.exit().transition()
+                .duration(duration)
+                .attr("d", function (d) {
+                    var o = { x: source.x, y: source.y };
+                    return diagonal({ source: o, target: o });
+                })
+                .remove();
+
+            // Stash the old positions for transition.
+            nodes.forEach(function (d) {
+                d.x0 = d.x;
+                d.y0 = d.y;
+            });
+        }
+
+        // Toggle children on click.
+        function click(d) {
+            if ((d.children == null) && (d._children == null)) {
+                console.log("end node, data scource " + d.dataName + " key: " + d.keyName + " key value: " + d.keyValue);
+                addDataToMap(d);
+            }
+
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+            } else {
+                d.children = d._children;
+                d._children = null;
+            }
+            update(d);
+        }
+    </script>
+    <script>
+        var crime30days = "http://opendata.dc.gov/datasets/dc3289eab3d2400ea49c154863312434_8";
+        var crime2016 = "http://opendata.dc.gov/datasets/bda20763840448b58f8383bae800a843_26";
+        var crime2015 = "http://opendata.dc.gov/datasets/35034fcb3b36499c84c94c069ab1a966_27";
+        var crime2014 = "http://opendata.dc.gov/datasets/6eaf3e9713de44d3aa103622d51053b5_9";
+        var crime2013 = "http://opendata.dc.gov/datasets/5fa2e43557f7484d89aac9e1e76158c9_10";
+        var crime2012 = "http://opendata.dc.gov/datasets/010ac88c55b1409bb67c9270c8fc18b5_11";
+        var dcwardGeojsonUrl = "http://opendata.dc.gov/datasets/0ef47379cbae44e88267c01eaec2ff6e_31.geojson";
+
+        var description = "Description: Use tree view to explore DC crime incidents by different categories, when select leaf node, the related crime data will be added on the map.";
+
+        $('#title').text("DC Crime Incidents");
+        $('#subtitle1').html('Geojson API: Crime Incidents -' + '<a id="a1" > Last 30 Days</a>' + "  " + '<a id="a2" >2016</a>' + "  " + '<a id="a3" >2015</a>' + "  " + '<a id="a4" >2014</a>' + "  " + '<a id="a5" >2013</a>' + "  " + '<a id="a6" >2012</a>');
+        $("#a1").attr("href", crime30days + ".geojson");
+        $("#a1").attr('title', crime30days + ".geojson");
+        $("#a2").attr("href", crime2016 + ".geojson");
+        $("#a2").attr('title', crime2016 + ".geojson");
+        $("#a3").attr("href", crime2015 + ".geojson");
+        $("#a3").attr('title', crime2015 + ".geojson");
+        $("#a4").attr("href", crime2014 + ".geojson");
+        $("#a4").attr('title', crime2014 + ".geojson");
+        $("#a5").attr("href", crime2013 + ".geojson");
+        $("#a5").attr('title', crime2013 + ".geojson");
+        $("#a6").attr("href", crime2012 + ".geojson");
+        $("#a6").attr('title', crime2012 + ".geojson");
+
+        $('#subtitle2').html('Datasource API: Crime Incidents -' + '<a id="b1" > Last 30 Days</a>' + "  " + '<a id="b2" >2016</a>' + "  " + '<a id="b3" >2015</a>' + "  " + '<a id="b4" >2014</a>' + "  " + '<a id="b5" >2013</a>' + "  " + '<a id="b6" >2012</a>');
+        $("#b1").attr("href", crime30days);
+        $("#b1").attr('title', crime30days);
+        $("#b2").attr("href", crime2016);
+        $("#b2").attr('title', crime2016);
+        $("#b3").attr("href", crime2015);
+        $("#b3").attr('title', crime2015);
+        $("#b4").attr("href", crime2014);
+        $("#b4").attr('title', crime2014);
+        $("#b5").attr("href", crime2013);
+        $("#b5").attr('title', crime2013);
+        $("#b6").attr("href", crime2012);
+        $("#b6").attr('title', crime2012);
+
+        $('#subtitle3').text(description);
+
+        var crimeDataArray = [];
+        var crime30daysData, crime2016Data, crime2015Data, crime2014Data, crime2013Data, crime2012Data;
+        var currentLayer;
+        var layerIDs = [];
+        var wardLayer = null;
+
+        mapboxgl.accessToken = token_DCCrimeIncidents_V2;
+
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v8',
+            center: [-77.034084142948, 38.909671288923],
+            zoom: 11
+        });
+
+        var popup = new mapboxgl.Popup({
+            closeOnClick: false,
+            closeButton: false
+        });
+
+        map.on('load', function () {
+            console.log("map loaded");
+            map.addSource('dcward', {
+                'type': 'geojson',
+                'data': dcwardGeojsonUrl
+            });
+
+            map.addLayer({
+                'id': 'dcward-layer',
+                'type': 'fill',
+                'source': 'dcward',
+                'paint': {
+                    'fill-color': 'rgba(200, 100, 240, 0.1)',
+                    'fill-outline-color': 'rgba(200, 100, 240, 2)'
+                }
+            });
+
+            $.getJSON(dcwardGeojsonUrl, function (dt) {
+                wardLayer = L.geoJson(dt, {});
+                console.log("Ward layer added");
+            });
+
+            getGeoJsonData();
+        });
+
+        function getGeoJsonData() {
+            d3.json(crime30days + ".geojson", function (err, data) {
+                if (!data) {
+                    console.log("crime30days is undefined");
+                }
+                else {
+                    console.log("crime30days downladed");
+                    crime30daysData = data;
+                    var crimeObj = {};
+                    crimeObj.dataName = "crime30days";
+                    crimeObj.dataSource = crime30days;
+                    crimeObj.dataAPI = crime30days + "_geojson";
+                    crimeObj.geojsonData = crime30daysData;
+                    crimeDataArray.push(crimeObj);
+                }
+            });
+
+            d3.json(crime2016 + ".geojson", function (err, data) {
+                if (!data) {
+                    console.log("crime2016 is undefined");
+                }
+                else {
+                    console.log("crime2016 downladed");
+                    crime2016Data = data;
+                    var crimeObj = {};
+                    crimeObj.dataName = "crime2016";
+                    crimeObj.dataSource = crime2016;
+                    crimeObj.dataAPI = crime2016 + "_geojson";
+                    crimeObj.geojsonData = crime2016Data;
+                    crimeDataArray.push(crimeObj);
+                }
+            });
+
+            d3.json(crime2015 + ".geojson", function (err, data) {
+                if (!data) {
+                    console.log("crime2015 is undefined");
+                }
+                else {
+                    console.log("crime2015 downladed");
+                    crime2015Data = data;
+                    var crimeObj = {};
+                    crimeObj.dataName = "crime2015";
+                    crimeObj.dataSource = crime2015;
+                    crimeObj.dataAPI = crime2015 + "_geojson";
+                    crimeObj.geojsonData = crime2015Data;
+                    crimeDataArray.push(crimeObj);
+
+                }
+            });
+
+            d3.json(crime2014 + ".geojson", function (err, data) {
+                if (!data) {
+                    console.log("crime2014 is undefined");
+                }
+                else {
+                    console.log("crime2014 downladed");
+                    crime2014Data = data;
+                    var crimeObj = {};
+                    crimeObj.dataName = "crime2014";
+                    crimeObj.dataSource = crime2014;
+                    crimeObj.dataAPI = crime2014 + "_geojson";
+                    crimeObj.geojsonData = crime2014Data;
+                    crimeDataArray.push(crimeObj);
+                }
+            });
+
+            d3.json(crime2013 + ".geojson", function (err, data) {
+                if (!data) {
+                    console.log("crime2013 is undefined");
+                }
+                else {
+                    console.log("crime2013 downladed");
+                    crime2013Data = data;
+
+                    var crimeObj = {};
+                    crimeObj.dataName = "crime2013";
+                    crimeObj.dataSource = crime2013;
+                    crimeObj.dataAPI = crime2013 + "_geojson";
+                    crimeObj.geojsonData = crime2013Data;
+                    crimeDataArray.push(crimeObj);
+                }
+            });
+
+            d3.json(crime2012 + ".geojson", function (err, data) {
+                if (!data) {
+                    console.log("crime2012 is undefined");
+                }
+                else {
+                    console.log("crime2012 downladed");
+                    crime2012Data = data;
+
+                    var crimeObj = {};
+                    crimeObj.dataName = "crime2012";
+                    crimeObj.dataSource = crime2012;
+                    crimeObj.dataAPI = crime2012 + "_geojson";
+                    crimeObj.geojsonData = crime2012Data;
+                    crimeDataArray.push(crimeObj);
+                }
+            });
+        }
+
+        function addDataToMap(data) {
+            var selectedData = [];
+            var filteredData = {};
+            var selectedSourceData;
+            var wardBounds = new mapboxgl.LngLatBounds();
+
+            $.each(crimeDataArray, function (i, obj) {
+                if (obj.dataName == data.dataName) {
+                    selectedSourceData = obj.geojsonData;
+                    return false;
+                }
+            });
+
+            //by month
+            if (data.type) {
+                $.each(selectedSourceData.features, function (i, d) {
+                    var tmp = Date.parse(d.properties.REPORTDATETIME);
+                    d.properties.month = new Date(tmp).getMonth() + 1;
+
+                    if (d.properties.month.toString() == data.keyValue) {
+                        selectedData.push(d);
+                    }
+                });
+            }
+            else {
+                $.each(selectedSourceData.features, function (i, d) {
+                    if (d.properties[data.keyName.toUpperCase()] == data.keyValue.toUpperCase()) {
+                        selectedData.push(d);
+                    }
+                });
+            }
+
+            filteredData.features = selectedData;
+            filteredData.type = "FeatureCollection";
+            console.log("data to be added to map: " + filteredData);
+
+            if (currentLayer) {
+                map.removeSource(currentLayer.id);
+                map.removeLayer(currentLayer.id);
+            }
+
+            map.addSource(data.dataName, {
+                'type': 'geojson',
+                'data': filteredData
+            });
+
+            map.addLayer({
+                "id": data.dataName,
+                "type": "circle",
+                "source": data.dataName,
+                "paint": {
+                    "circle-color": "red",
+                    "circle-opacity": 0.75,
+                    "circle-radius": 5
+                }
+            });
+
+            currentLayer = map.getLayer(data.dataName);
+            layerIDs.push(data.dataName);
+
+            //zoom to ward or zoom to full DC
+            if (data.keyName == "WARD") {
+                wardLayer.eachLayer(function (layer) {
+                    if (layer.feature.properties["WARD_ID"] == data.keyValue) {
+                        var minLngLat = [];
+                        var maxLngLat = [];
+                        minLngLat.push(layer.getBounds()._southWest.lng);
+                        minLngLat.push(layer.getBounds()._southWest.lat);
+                        maxLngLat.push(layer.getBounds()._northEast.lng);
+                        maxLngLat.push(layer.getBounds()._northEast.lat);
+                        map.fitBounds([minLngLat, maxLngLat]);
+                        return;
+                    }
+                });
+            }
+            else {
+                var minLngLat = [];
+                var maxLngLat = [];
+                minLngLat.push(wardLayer.getBounds()._southWest.lng);
+                minLngLat.push(wardLayer.getBounds()._southWest.lat);
+                maxLngLat.push(wardLayer.getBounds()._northEast.lng);
+                maxLngLat.push(wardLayer.getBounds()._northEast.lat);
+                map.fitBounds([minLngLat, maxLngLat]);
+                return;
+            }
+
+            console.log(" after fotbounds");
+        }
+
+        map.on('mousemove', function (e) {
+            var features = map.queryRenderedFeatures(e.point, { layers: layerIDs });
+            // Change the cursor style as a UI indicator.
+            map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+        });
+
+        map.on('click', function (e) {
+            var features = map.queryRenderedFeatures(e.point, { layers: layerIDs });
+            if (!features.length) {
+                popup.remove();
+                return;
+            }
+
+            var feature = features[0];
+
+            var cont = "Time: " + feature.properties.REPORTDATETIME + "<br>Crime: " + feature.properties.OFFENSE + "<br>Location: " + feature.properties.BLOCKSITEADDRESS;
+
+            // Use wrapped coordinates to ensure longitude is within (180, -180)
+            var coords = feature.geometry.coordinates;
+            var ll = new mapboxgl.LngLat(coords[0], coords[1]);
+            var wrapped = ll.wrap();
+
+            popup.setLngLat(wrapped)
+            .setHTML(cont)
+            .addTo(map);
+        });
+    </script>
+</body>

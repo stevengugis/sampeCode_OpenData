@@ -1,0 +1,260 @@
+﻿
+        .map-overlay {
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            position: absolute;
+            /*width: 25%;*/
+            width: 300px;
+            top: 0;
+            left: 0;
+            padding: 10px;
+        }
+
+            .map-overlay .map-overlay-inner {
+                background-color: #fff;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.20);
+                border-radius: 3px;
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+
+            .map-overlay h2 {
+                line-height: 24px;
+                display: block;
+                margin: 0 0 10px;
+            }
+
+            .map-overlay .legend .bar {
+                height: 10px;
+                display: inline-block;
+            }
+
+            .map-overlay input {
+                background-color: transparent;
+                display: inline-block;
+                width: 100%;
+                position: relative;
+                margin: 0;
+                cursor: ew-resize;
+            }
+
+        .blocker {
+            color: #00704A;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        #month {
+            display: none;
+        }
+
+        #slider {
+            display: none;
+        }
+ 
+        .childbox1 {
+            font: 24px/1 Arial, sans-serif;
+            padding: 5px;
+            border: 0px solid black;
+            margin: 0px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFF;
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+
+        .childbox2 {
+            padding: 0px;
+            margin-left: 10px;
+            color: #FFF;
+            font-weight: normal;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            border: solid 0px red;
+        }
+
+        .map-overlay2 {
+            position: relative;
+            padding: 5px;
+            margin: auto;
+            width: 40%;
+            border-radius: 5px;
+            z-index: 300;
+            background-color: #50667f;
+            opacity: 0.8;
+        }
+
+        a:link {
+            color: white;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+
+        a:visited {
+            color: yellow;
+            background-color: transparent;
+            text-decoration: none;
+        }
+
+        a:hover {
+            font-weight: bold;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+   
+        .legend {
+            background-color: #fff;
+            border-radius: 3px;
+            bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            padding: 10px;
+            position: absolute;
+            right: 10px;
+            z-index: 1;
+        }
+
+            .legend h4 {
+                margin: 0 0 10px;
+            }
+
+            .legend div span {
+                border-radius: 50%;
+                display: inline-block;
+                height: 10px;
+                margin-right: 5px;
+                width: 10px;
+            }
+
+        .marker {
+            /*border: #fff 1.4px solid; border-radius: 50%;  box-shadow: 1px 1px 1px;*/
+            cursor: pointer;
+            height: 48px;
+            width: 48px;
+            margin: -24px 0 0 -24px;
+            background-size: cover;
+        }
+
+            .marker:hover {
+                z-index: 1;
+                border-color: #390;
+            }
+
+        .img-sd {
+            height: 15px;
+            width: 15px;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            float: left;
+            margin-right: 10px;
+        }
+ 
+        #pieChart {
+            background-color: #fff;
+            border-radius: 3px;
+            bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            position: absolute;
+            left: 10px;
+            width: 200px;
+            height: 200px;
+            z-index: 1;
+            border: 0px solid red;
+            display: none;
+        }
+
+        #barChart {
+            background-color: #fff;
+            border-radius: 3px;
+            bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+            position: absolute;
+            left: 210px;
+            height: 200px;
+            z-index: 1;
+            border: 0px solid red;
+            display: none;
+        }
+
+        #lineChart {
+            background-color: #fff;
+            border-radius: 3px;
+            bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+            position: absolute;
+            bottom: 160px;
+            left: 210px;
+            height: 50px;
+            z-index: 1;
+            border: 0px solid red;
+            display: none;
+        }
+
+        .slice {
+            font-size: 10pt;
+            font-family: Verdana;
+            fill: white;          
+        }      
+
+        .dot {
+            /*fill: white;*/
+            /*stroke: steelblue;*/
+            stroke-width: 1.5px;
+        }
+
+        .axis text {
+            font-family: Verdana;
+            font-size: 11px;
+        }
+
+        .title {
+            font-family: Verdana;
+            font-size: 15px;
+        }
+
+        .xAxis {
+            font-family: verdana;
+            font-size: 11px;
+            fill: black;
+        }
+
+        .yAxis {
+            font-family: verdana;
+            font-size: 11px;           
+            fill: black;
+        }
+
+
+        table {
+            border-collapse: collapse;
+            border: 0px;
+            font-family: Verdana;
+            color: #5C5558;
+            font-size: 12px;
+            text-align: right;
+        }
+
+        td {
+            padding-left: 10px;
+        }
+
+        #lineChartTitle1 {
+            font-family: Verdana;
+            font-size: 14px;
+            fill: lightgrey;
+            font-weight: bold;
+            text-anchor: middle;
+        }
+
+        #lineChartTitle2 {
+            font-family: Verdana;
+            font-size: 30px;
+            fill: grey;
+            text-anchor: middle;
+            font-weight: bold;
+            /*font-style: italic;*/
+        }
+    

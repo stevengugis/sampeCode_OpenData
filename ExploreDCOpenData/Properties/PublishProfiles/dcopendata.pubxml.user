@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit http://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_PublishTargetUrl>P:\inetpub\wwwroot\ExploreDCOpenData</_PublishTargetUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="Backup_DCCapital ikeShareLocations.html">
+      <publishTime>05/18/2016 10:33:20</publishTime>
+    </File>
+    <File Include="backup_DCPoliceStations.html">
+      <publishTime>05/17/2016 15:43:26</publishTime>
+    </File>
+    <File Include="backup_DCPrimaryCareCenters.htm">
+      <publishTime>05/09/2016 11:01:51</publishTime>
+    </File>
+    <File Include="bin/ExploreDCOpenData.dll">
+      <publishTime>07/06/2016 10:02:56</publishTime>
+    </File>
+    <File Include="config.js">
+      <publishTime>06/28/2016 13:42:57</publishTime>
+    </File>
+    <File Include="DCATMBanking.html">
+      <publishTime>06/29/2016 14:28:50</publishTime>
+    </File>
+    <File Include="DCBuildingPermits.html">
+      <publishTime>07/21/2016 16:49:07</publishTime>
+    </File>
+    <File Include="DCCapital ikeShareLocations.html">
+      <publishTime>05/18/2016 11:33:17</publishTime>
+    </File>
+    <File Include="DCCapitalBikeShareLocations.html">
+      <publishTime>06/28/2016 13:48:21</publishTime>
+    </File>
+    <File Include="DCCensusTracts.html">
+      <publishTime>06/28/2016 13:31:48</publishTime>
+    </File>
+    <File Include="DCCensusTractsbyMedianIncome.html">
+      <publishTime>06/29/2016 10:08:05</publishTime>
+    </File>
+    <File Include="DCCensusTractsbyMedianIncome_V2.html">
+      <publishTime>06/29/2016 14:58:12</publishTime>
+    </File>
+    <File Include="DCCensusTractsbyMedianIncome_V3.html">
+      <publishTime>07/06/2016 10:00:09</publishTime>
+    </File>
+    <File Include="DCCensusTractsbyPopulation.html">
+      <publishTime>07/06/2016 09:58:21</publishTime>
+    </File>
+    <File Include="DCCensusTracts_V2.html">
+      <publishTime>06/29/2016 10:35:12</publishTime>
+    </File>
+    <File Include="DCCrime.json">
+      <publishTime>06/10/2016 20:16:32</publishTime>
+    </File>
+    <File Include="DCCrimeIncidents.html">
+      <publishTime>07/21/2016 16:49:20</publishTime>
+    </File>
+    <File Include="DCCrimeIncidents2.html">
+      <publishTime>07/07/2016 12:31:40</publishTime>
+    </File>
+    <File Include="DCCrimeIncidentsLast30Days.html">
+      <publishTime>07/06/2016 10:15:35</publishTime>
+    </File>
+    <File Include="DCCrimeIncidents_V2.html">
+      <publishTime>07/15/2016 14:46:28</publishTime>
+    </File>
+    <File Include="DCCrimesIncidents.htm">
+      <publishTime>06/28/2016 13:47:49</publishTime>
+    </File>
+    <File Include="DCCrimeTree.js">
+      <publishTime>06/28/2016 13:31:48</publishTime>
+    </File>
+    <File Include="DCFindSidewalkCafe.html">
+      <publishTime>06/28/2016 13:48:21</publishTime>
+    </File>
+    <File Include="DCHealthCare.htm">
+      <publishTime>06/29/2016 09:57:25</publishTime>
+    </File>
+    <File Include="DCLoadDCOpenData.html">
+      <publishTime>09/06/2016 14:27:18</publishTime>
+    </File>
+    <File Include="DCNotaryPublicLocations.html">
+      <publishTime>07/06/2016 16:27:42</publishTime>
+    </File>
+    <File Include="DCPoliceStations.html">
+      <publishTime>06/28/2016 13:48:49</publishTime>
+    </File>
+    <File Include="DCPublicSchools.htm">
+      <publishTime>06/28/2016 13:44:24</publishTime>
+    </File>
+    <File Include="DCWard.html">
+      <publishTime>06/28/2016 13:31:48</publishTime>
+    </File>
+    <File Include="images/healthcare.png">
+      <publishTime>05/17/2016 15:24:54</publishTime>
+    </File>
+    <File Include="images/m1.png">
+      <publishTime>07/05/2016 11:40:47</publishTime>
+    </File>
+    <File Include="images/m2.png">
+      <publishTime>07/05/2016 11:40:47</publishTime>
+    </File>
+    <File Include="images/m3.png">
+      <publishTime>07/05/2016 11:40:47</publishTime>
+    </File>
+    <File Include="images/m4.png">
+      <publishTime>07/05/2016 11:40:47</publishTime>
+    </File>
+    <File Include="images/m5.png">
+      <publishTime>07/05/2016 11:40:47</publishTime>
+    </File>
+    <File Include="images/pin.png">
+      <publishTime>07/05/2016 11:40:47</publishTime>
+    </File>
+    <File Include="images/policeStation.png">
+      <publishTime>05/17/2016 15:08:55</publishTime>
+    </File>
+    <File Include="images/school.png">
+      <publishTime>05/17/2016 15:07:28</publishTime>
+    </File>
+    <File Include="IsotopoSample.html">
+      <publishTime>08/18/2016 09:17:33</publishTime>
+    </File>
+    <File Include="src/geojsonlayer.js">
+      <publishTime>09/06/2016 14:11:49</publishTime>
+    </File>
+    <File Include="testDCLoad.html">
+      <publishTime>09/06/2016 14:23:36</publishTime>
+    </File>
+    <File Include="Web.config">
+      <publishTime>05/18/2016 15:00:43</publishTime>
+    </File>
+  </ItemGroup>
+</Project>

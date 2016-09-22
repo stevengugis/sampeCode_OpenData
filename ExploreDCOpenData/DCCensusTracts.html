@@ -1,0 +1,196 @@
+﻿
+<html>
+<head>
+    <title>population density</title>
+    <meta charset="utf-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+    <link rel="polygon" type="application/json" href="http://opendata.dc.gov/datasets/6969dd63c5cb4d6aa32f15effb8311f3_8.geojson">
+    <style>
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+
+            .info h4 {
+                margin: 0 0 5px;
+                color: #777;
+            }
+
+        .legend {
+            line-height: 18px;
+            color: #555;
+        }
+
+            .legend i {
+                width: 18px;
+                height: 18px;
+                float: left;
+                margin-right: 8px;
+                opacity: 0.7;
+            }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <style>
+        .childbox1 {
+            font: 28px/1 Arial, sans-serif;
+            padding: 12px;
+            border: 0px solid black;
+            margin: 0px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFF;
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+
+        .childbox2 {
+            padding: 0px;
+            margin-left: 10px;
+            color: #FFF;
+            font-weight: normal;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            border: solid 0px red;
+        }
+
+        .map-overlay2 {
+            position: relative;
+            padding: 5px;
+            margin: auto;
+            width: 40%;
+            border-radius: 5px;
+            z-index: 300;
+            background-color: #50667f;
+            opacity: 0.8;
+        }
+
+        a:link {
+            color: white;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+
+        a:visited {
+            color: yellow;
+            background-color: transparent;
+            text-decoration: none;
+        }
+
+        a:hover {
+            font-weight: bold;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="map">
+        <div class='map-overlay2'>
+            <div id="title" class="childbox1">
+            </div>
+            <div id="subtitle1" class="childbox2">
+            </div>
+            <div id="subtitle2" class="childbox2">
+            </div>
+            <div id="subtitle3" class="childbox2">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var geojson_url = "http://opendata.dc.gov/datasets/6969dd63c5cb4d6aa32f15effb8311f3_8.geojson";
+        var dataSource_url = "http://opendata.dc.gov/datasets/6969dd63c5cb4d6aa32f15effb8311f3_8";
+        var instruction = "Instructions: Click the census tract polygon to check census tract population.";
+
+        $('#title').text("Census Tracts - 2010");
+
+        $('#subtitle1').html('<a id="a1" >Geojson API</a>');
+        $("#a1").attr("href", geojson_url);
+        $("#a1").attr('title', geojson_url);
+
+        $('#subtitle2').html('<a id="a2" >Data Source</a>');
+        $("#a2").attr("href", dataSource_url);
+        $("#a2").attr('title', dataSource_url);
+
+        $('#subtitle3').text(instruction);
+
+        var map = L.map('map').setView([38.8929, -77.0252], 12);
+
+        // L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+        L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {
+          attribution: 'Tiles by <a href="http://mapc.org">MAPC</a>, Data by <a href="http://mass.gov/mgis">MassGIS</a>',
+          maxZoom: 17,
+          minZoom: 9
+      }).addTo(map);
+
+        function getColor(p) {
+            console.log("NUmber is: " + p);
+            return p >= 7000 ? '#253494' :
+                   p >= 5000 && p <= 7000 ? '#2c7fb8' :
+                   p >= 3000 && p <= 5000 ? '#41b6c4' :
+                   p >= 1000 && p <= 3000 ? '#a1dab4' :
+                    '#ffffcc';
+        }
+        function setStyle(feature) {
+            return {
+                fillColor: getColor(feature.properties.P0010001),
+                weight: 2,
+                opacity: 1.0,
+                color: 'black',
+                fillOpacity: 0.5
+            };
+        }
+
+        $.getJSON(geojson_url, function (data) {
+            var geojson = L.geoJson(data, {
+                style: setStyle,
+                onEachFeature: function (feature, layer) {
+                    layer.bindPopup("Tract: " + feature.properties.TRACT + "<br>" + "Population: " + feature.properties.P0010001)
+                }
+            });
+
+
+            var legend = L.control({ position: 'bottomright' });
+
+            legend.onAdd = function (map) {
+
+                var div = L.DomUtil.create('div', 'info legend'),
+                    lower = [0, 1000, 3000, 5000, 7000],
+                    upper = [1000, 3000, 5000, 7000, "plus"],
+                    labels = [""];
+
+                // loop through our density intervals and generate a label with a colored square for each interval
+                for (var i = 0; i < lower.length; i++) {
+                    div.innerHTML +=
+                        '<i style="background:' + getColor(lower[i] + 1) + '"></i> ' +
+                        lower[i] + '&ndash;' + upper[i] + '<br>';
+                }
+
+                return div;
+            };
+
+            //var map = L.map('map').setView([38.8929, -77.0252], 12);
+            //baseTiles.addTo(map);
+            geojson.addTo(map);
+            legend.addTo(map);
+
+        });
+
+    </script>
+</body>
+</html>

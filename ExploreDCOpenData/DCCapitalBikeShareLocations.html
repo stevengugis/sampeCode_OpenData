@@ -1,0 +1,474 @@
+﻿<html>
+<head>
+    <meta charset=utf-8 />
+    <title>Capital Bike Share Locations</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/turf/v1.3.0/turf.min.js'></script>
+    <script src='https://api.tiles.mapbox.com/mapbox.js/v2.0.1/mapbox.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox.js/v2.0.1/mapbox.css' rel='stylesheet' />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <link href='https://www.mapbox.com/base/latest/base.css' rel='stylesheet' />
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="config.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .leaflet-popup-content .marker-title {
+            font-weight: 400;
+            color: #999;
+            line-height: 1.3em;
+        }
+
+        .marker-title span {
+            color: #00704A;
+            font-weight: bold;
+        }
+
+        #milecount {
+            line-height: 2em;
+            color: #00704A;
+        }
+
+        .space-left2 {
+            margin-left: 20px;
+        }
+
+        ul.pin-top {
+            border-radius: 3px;
+        }
+
+            ul.pin-top li {
+                padding: 1em;
+            }
+
+        span.label {
+            display: block;
+        }
+
+        li.fill-white {
+            padding: .5em 1em 1em 1em;
+        }
+
+        li .content {
+            display: none;
+        }
+
+        li.fill-white .content {
+            display: block;
+        }
+
+        li.fill-white span.label, li.fill-purple span.label, li.fill-green span.label {
+            text-transform: uppercase;
+            font-size: .7em;
+            margin-bottom: .7em;
+        }
+
+        li.fill-green, li.fill-purple {
+            color: #FFF;
+        }
+
+        .elevGraph {
+            fill: rgba(0, 0, 0, 0.1);
+            stroke: none;
+            stroke-width: 4px;
+        }
+
+        #title-block {
+            height: 60px;
+        }
+
+        #tooltip {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #searchresults {
+            width: 93%;
+            background: #FFF;
+        }
+        input:focus + #searchresults, #searchresults:active {
+                display: block;
+            }
+
+        .result {
+            background: white;
+            width: 260px;
+            display: block;
+            padding: 10px;
+            cursor: pointer;
+            line-height: 1.4em;
+        }
+
+            .result:hover {
+                color: #00704A;
+            }
+
+        .marker-hover {
+            background: steelblue;
+            border-radius: 50%;
+            border: 2px solid white;
+            height: 20px;
+        }
+
+        .focus circle {
+            fill: steelblue;
+            stroke: white;
+        }
+
+        #geolocate {
+            display: none;
+        }
+        .fill-white {
+            background-color: #fff;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+            font-weight: bold;
+        }
+        .fill-denim {
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+        .fill-green {
+            background: #50667f none repeat scroll 0 0;
+            opacity: 1;
+         }
+        .col5 {
+            float: right;
+            max-width: 300px;
+            width: 33%;
+            }
+        .button {
+            font-weight:normal;
+        }
+        .round short{
+            font-size:12px;
+        }
+    </style>
+    <style>
+        .childbox1 {
+            font: 28px/1 Arial, sans-serif;
+            padding: 12px;
+            border: 0px solid black;
+            margin: 0px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFF;
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+
+        .childbox2 {
+            padding: 0px;
+            margin-left: 10px;
+            color: #FFF;
+            font-weight: normal;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            border: solid 0px red;
+        }
+
+        .map-overlay2 {
+            position: relative;
+            padding: 5px;
+            margin: auto;
+            width: 40%;
+            border-radius: 5px;
+            z-index: 300;
+            background-color: #50667f;
+            opacity: 0.8;
+        }
+
+        a:link {
+            color: white;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+
+        a:visited {
+            color: yellow;
+            background-color: transparent;
+            text-decoration: none;
+        }
+
+        a:hover {
+            font-weight: bold;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+    </style>
+
+</head>
+<body>
+    <div id='map'></div>
+    <div class='map-overlay2'>
+        <div id="title" class="childbox1">
+        </div>
+        <div id="subtitle1" class="childbox2">
+        </div>
+        <div id="subtitle2" class="childbox2">
+        </div>
+        <div id="subtitle3" class="childbox2">
+        </div>
+    </div>
+
+    <ul class='pin-top pad1 quiet space-top2 space-left2 col4'>
+        <li id='title-block' class='fill-denim dark keyline-bottom'>
+            <p class='col10 space-top0'>Find Capital Bike Share Locations: </p>
+            <p class='col2 button fr fill-denim icon refresh short'></p>
+        </li>
+        <li id='start-location' class='fill-white keyline-bottom'>
+            <span class='label'>Choose starting location</span>
+            <div class='content'>
+                <div>
+                    <span id='milecount' class='strong'>0</span> locations within a 5 minute walk from here
+                </div>
+                <div id='findme' class='button short fill-green'>Use my Location</div>
+                <div id='geolocate' class='row1 space-top1'>
+                    <fieldset class="col6 with-icon">
+                        <span class="icon search" style="top:5px; left:0px"></span>
+                        <input type="text" placeholder="Search" class="round short" autocomplete="off" style="width:250px;font-size:12px;margin-right:0px">
+                        <div id="searchresults"></div>
+                    </fieldset>
+                    <!--<div class='col5 margin1 button short fr fill-green' id='findme'>Use my Location</div>-->
+                </div>
+            </div>
+            <div class='selection'>
+            </div>
+        </li>
+
+    </ul>
+    <div id='tooltip' class='col4'></div>
+    <!--<script type='text/javascript' src='d3.js'></script>-->
+    <script>
+        var geojson_url = "http://opendata.dc.gov/datasets/a1f7acf65795451d89f0a38565a975b3_5.geojson";
+        var dataSource_url = "http://opendata.dc.gov/datasets/a1f7acf65795451d89f0a38565a975b3_5";
+        var instruction = "Instructions: enter address, use your current location, or drag the icon around DC map to find nearby bike share stations.";
+
+        $('#title').text("Capital Bike Share Locations");
+
+        $('#subtitle1').html('<a id="a1" >Geojson API</a>');
+        $("#a1").attr("href", geojson_url);
+        $("#a1").attr('title', geojson_url);
+
+        $('#subtitle2').html('<a id="a2" >Data Source</a>');
+        $("#a2").attr("href", dataSource_url);
+        $("#a2").attr('title', dataSource_url);
+
+        $('#subtitle3').text(instruction);
+
+        L.mapbox.accessToken = token_DCCapitalBikeShareLocations;
+
+        var map = L.mapbox.map('map', 'duncangraham.b134a19e', { zoomControl: true })
+            .setView([38.90512740512037, -77.03433036804199], 14);
+
+        var isEmbed = location.search;
+        isEmbed = isEmbed.slice(1);
+
+        if (isEmbed == 'embed') {
+            new L.Control.Zoom({ position: 'topright' }).addTo(map);
+            map.scrollWheelZoom.disable();
+        }
+
+        var marker = L.marker(new L.LatLng(38.904, -77.032), {
+            icon: L.mapbox.marker.icon({
+                "marker-color": "#8E8E8E",
+                "title": "where are the stations?",
+                "marker-symbol": "pitch",
+                "marker-size": "large"
+            }),
+            draggable: true,
+            zIndexOffset: 999
+        });
+
+        var start,
+            destination;
+
+        var currentPosition;
+
+        //geolocation
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            }
+        }
+
+        function showPosition(position) {
+            currentPosition = [position.coords.latitude, position.coords.longitude];
+            //if in DC, show geocoder.
+            if (currentPosition[0] >= 38.77442837007637 && currentPosition[0] <= 39.04478604850143 && currentPosition[1] >= -77.23800659179688 && currentPosition[1] <= -76.82601928710938) {
+                $('#geolocate').show();
+            }
+        }
+
+        function pointBuffer(pt, radius, units, resolution) {
+            var ring = []
+            var resMultiple = 360 / resolution;
+            for (var i = 0; i < resolution; i++) {
+                var spoke = turf.destination(pt, radius, i * resMultiple, units);
+                ring.push(spoke.geometry.coordinates);
+            }
+            if ((ring[0][0] !== ring[ring.length - 1][0]) && (ring[0][1] != ring[ring.length - 1][1])) {
+                ring.push([ring[0][0], ring[0][1]]);
+            }
+            return turf.polygon([ring])
+        }
+
+        $.get(geojson_url, function (data) {
+            //test if data is JSON
+            if (typeof data == 'object') {
+                var fc = data;
+            } else {
+                var fc = JSON.parse(data);
+            }
+
+            $('#findme').on('click', function () {
+                marker.setLatLng(currentPosition);
+                map.setView(currentPosition, 14);
+                updateVenues();
+            });
+
+            //input search functionality
+            $('fieldset input').keyup(function (event) {
+                var addrs = [];
+                var addrCoords = [];
+                var contents = $('fieldset input').val();
+                var url = 'https://api.tiles.mapbox.com/v4/geocode/mapbox.places/' + contents + '.json?access_token=' + L.mapbox.accessToken;
+
+                $.get(url, function (data) {
+                    $('.result').remove();
+                    data.features.forEach(function (result) {
+                        var place = result['place_name'];
+                        var reg = new RegExp(contents, "gi");
+
+                        var dcplace = "District of Columbia";
+                        if (place.includes(dcplace)) {
+                            place = place.replace(dcplace, "DC");
+                            place = place.replace(", United States", "");
+                            addrCoords.push(result.center);
+                            addrs.push(place);
+                            place = place.replace(reg, function (match) { return "<strong>" + match + "</strong>" });
+
+                            $('#searchresults')
+                                .append('<div class="result keyline-bottom keyline-left keyline-right small">' + place + '</div>');
+                        }
+                    });
+                    $('.result').each(function (index) {
+                        var dcplace = "District of Columbia";
+
+                        $(this).on('click', function () {
+                            var coords = addrCoords[index];
+                            $('fieldset input').val(addrs[index]);
+
+                            map.setView([coords[1], coords[0]], 13);
+                            marker.setLatLng([coords[1], coords[0]]);
+                            marker.addTo(map);
+                            updateVenues();
+                            $('.result').remove();
+                        })
+                    })
+                })
+
+                if (event.keyCode == 13) {
+                    geocoder.query(contents, showMap);
+                    $('input').blur();
+                }
+            });
+
+            // get position, draw buffer, find within, find nearest, add to map
+            function updateVenues() {
+                $('path').remove();
+                $('.leaflet-marker-pane img').not(':first').remove();
+                var position = marker.getLatLng();
+
+                var point = turf.point(position.lng, position.lat);
+
+                //draw buffer
+                var bufferLayer = L.mapbox.featureLayer().addTo(map);
+                var buffer = pointBuffer(point, .25, 'miles', 120);
+                buffer.properties = {
+                    "fill": "#00704A",
+                    "fill-opacity": 0.1,
+                    "stroke": "#00704A",
+                    "stroke-width": 2,
+                    "stroke-opacity": 0.5
+                };
+
+                bufferLayer.setGeoJSON(buffer);
+                //var within = turf.within(fc,bufferLayer.getGeoJSON());
+
+                var within = turf.featurecollection(fc.features.filter(function (shop) {
+                    if (turf.distance(shop, point, 'miles') <= .25) return true;
+                }));
+                $('#milecount').html(within.features.length);
+                function mileConvert(miles) {
+                    if (miles <= 0.25) {
+                        return (miles * 5280).toFixed(0) + ' ft';
+                    } else {
+                        return miles.toFixed(2) + ' mi';
+                    }
+                }
+                within.features.forEach(function (feature) {
+                    var distance = parseFloat(turf.distance(point, feature, 'miles'));
+                    feature.properties["marker-color"] = "C73E3E";
+                    feature.properties["title"] = '<span>Distance: ' + mileConvert(distance) + '</span><br>Address: ' + feature.properties["ADDRESS"] + '<br>Bikes: ' + feature.properties["NUMBER_OF_BIKES"] + '<br>Empty Docks: ' + feature.properties["NUMBER_OF_EMPTY_DOCKS"];
+                    feature.properties["marker-size"] = "medium";
+                    feature.properties["marker-symbol"] = "bicycle";
+                })
+
+                var nearest = turf.nearest(point, fc);
+                var nearestdist = parseFloat(turf.distance(point, nearest, 'miles'));
+
+                nearest.properties["marker-color"] = "C73E3E";
+                nearest.properties["title"] = '<span>' + mileConvert(nearestdist) + ' (nearest)</span><br>' + nearest.properties["name"] + '<br>Bikes: ' + nearest.properties["NUMBER_OF_BIKES"] + '<br>Empty Docks: ' + nearest.properties["NUMBER_OF_EMPTY_DOCKS"];
+                nearest.properties["marker-size"] = "large";
+                nearest.properties["marker-symbol"] = "bicycle";
+
+                var nearest_fc = L.mapbox.featureLayer().setGeoJSON(turf.featurecollection([within, nearest])).addTo(map);
+
+                nearest_fc.on('mouseover', function (e) {
+                    e.layer.openPopup();
+                });
+                nearest_fc.on('mouseout', function (e) {
+                    e.layer.closePopup();
+                })
+            }
+
+            marker.on('drag', function () { updateVenues() });
+
+            updateVenues();
+
+            var elevProfile = [];
+            var queryPoints = [];
+
+            var hover = L.marker([], {
+                icon: L.divIcon({
+                    className: 'marker-hover',
+                    iconSize: 20,
+                    iconAnchor: [10, 10]
+                })
+            })
+        });
+
+        $('.refresh').on('click', function () {
+            document.location.reload(true);
+        })
+
+        getLocation();
+        marker.addTo(map);
+
+    </script>
+</body>
+</html>

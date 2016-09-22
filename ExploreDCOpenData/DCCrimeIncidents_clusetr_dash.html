@@ -1,0 +1,1199 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>DC Crime Incidents - 2015</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="config.js"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <style>
+        .map-overlay {
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            position: absolute;
+            width: 25%;
+            top: 0;
+            left: 0;
+            padding: 10px;
+        }
+
+            .map-overlay .map-overlay-inner {
+                background-color: #fff;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.20);
+                border-radius: 3px;
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+
+            .map-overlay h2 {
+                line-height: 24px;
+                display: block;
+                margin: 0 0 10px;
+            }
+
+            .map-overlay .legend .bar {
+                height: 10px;
+                display: inline-block;
+            }
+
+            .map-overlay input {
+                background-color: transparent;
+                display: inline-block;
+                width: 100%;
+                position: relative;
+                margin: 0;
+                cursor: ew-resize;
+            }
+
+        .blocker {
+            color: #00704A;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        #month {
+            display: none;
+        }
+
+        #slider {
+            display: none;
+        }
+    </style>
+    <style>
+        .childbox1 {
+            font: 24px/1 Arial, sans-serif;
+            padding: 5px;
+            border: 0px solid black;
+            margin: 0px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFF;
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+
+        .childbox2 {
+            padding: 0px;
+            margin-left: 10px;
+            color: #FFF;
+            font-weight: normal;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            border: solid 0px red;
+        }
+
+        .map-overlay2 {
+            position: relative;
+            padding: 5px;
+            margin: auto;
+            width: 40%;
+            border-radius: 5px;
+            z-index: 300;
+            background-color: #50667f;
+            opacity: 0.8;
+        }
+
+        a:link {
+            color: white;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+
+        a:visited {
+            color: yellow;
+            background-color: transparent;
+            text-decoration: none;
+        }
+
+        a:hover {
+            font-weight: bold;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+    </style>
+
+    <style>
+        .legend {
+            background-color: #fff;
+            border-radius: 3px;
+            bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            padding: 10px;
+            position: absolute;
+            right: 10px;
+            z-index: 1;
+        }
+
+            .legend h4 {
+                margin: 0 0 10px;
+            }
+
+            .legend div span {
+                border-radius: 50%;
+                display: inline-block;
+                height: 10px;
+                margin-right: 5px;
+                width: 10px;
+            }
+
+        .marker {
+            /*border: #fff 1.4px solid; border-radius: 50%;  box-shadow: 1px 1px 1px;*/
+            cursor: pointer;
+            height: 48px;
+            width: 48px;
+            margin: -24px 0 0 -24px;
+            background-size: cover;
+        }
+
+            .marker:hover {
+                z-index: 1;
+                border-color: #390;
+            }
+
+        .img-sd {
+            height: 15px;
+            width: 15px;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            float: left;
+            margin-right: 10px;
+        }
+    </style>
+    <style type="text/css">
+        #pieChart {
+            background-color: #fff;
+            border-radius: 3px;
+            bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            position: absolute;
+            left: 10px;
+            width: 200px;
+            height: 200px;
+            z-index: 1;
+            border: 0px solid red;
+            display: none;
+        }
+
+        #barChart {
+            background-color: #fff;
+            border-radius: 3px;
+            bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+            position: absolute;
+            left: 210px;
+            height: 200px;
+            z-index: 1;
+            border: 0px solid red;
+            display: none;
+        }
+
+        #lineChart {
+            background-color: #fff;
+            border-radius: 3px;
+            bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+            position: absolute;
+            bottom: 160px;
+            left: 210px;
+            height: 50px;
+            z-index: 1;
+            border: 0px solid red;
+            display: none;
+        }
+
+        .slice {
+            font-size: 10pt;
+            font-family: Verdana;
+            fill: white;
+        }
+
+        .dot {
+            /*fill: white;*/
+            /*stroke: steelblue;*/
+            stroke-width: 1.5px;
+        }
+
+        .axis text {
+            font-family: Verdana;
+            font-size: 11px;
+        }
+
+        .title {
+            font-family: Verdana;
+            font-size: 15px;
+        }
+
+        .xAxis {
+            font-family: verdana;
+            font-size: 11px;
+            fill: black;
+        }
+
+        .yAxis {
+            font-family: verdana;
+            font-size: 11px;
+            fill: black;
+        }
+
+
+        table {
+            border-collapse: collapse;
+            border: 0px;
+            font-family: Verdana;
+            color: #5C5558;
+            font-size: 12px;
+            text-align: right;
+        }
+
+        td {
+            padding-left: 10px;
+        }
+
+        #lineChartTitle1 {
+            font-family: Verdana;
+            font-size: 14px;
+            fill: lightgrey;
+            font-weight: bold;
+            text-anchor: middle;
+        }
+
+        #lineChartTitle2 {
+            font-family: Verdana;
+            font-size: 30px;
+            fill: grey;
+            text-anchor: middle;
+            font-weight: bold;
+            /*font-style: italic;*/
+        }
+    </style>
+
+    <div id='map'></div>
+    <div class='map-overlay2'>
+        <div id="title" class="childbox1">
+        </div>
+        <div id="subtitle1" class="childbox2">
+        </div>
+        <div id="subtitle2" class="childbox2">
+        </div>
+        <div id="subtitle3" class="childbox2">
+        </div>
+    </div>
+    <div class='map-overlay top'>
+        <div class='map-overlay-inner'>
+            <h2>  DC Crime Incidents - 2015</h2>
+            <div id="download" class='blocker strong large pad0'>
+                Downloading crime data...
+            </div>
+            <label id='month'></label>
+            <input id='slider' type='range' min='0' max='11' step='1' value='0' />
+        </div>
+    </div>
+
+    <div id='legendDiv' class='legend'></div>
+
+    <div id="pieChart"></div>
+    <div id="barChart"></div>
+    <div id="lineChart"></div>
+
+    <script src='//d3js.org/d3.v3.min.js' charset='utf-8'></script>
+    <script>
+        //add title
+        var geojson_url = "http://opendata.dc.gov/datasets/35034fcb3b36499c84c94c069ab1a966_27.geojson";
+        var daraSource_url = "http://opendata.dc.gov/datasets/35034fcb3b36499c84c94c069ab1a966_27";
+        var instruction = "Description: Move slide bar to see the crime incidents in different months, click incident point to check details";
+        var whereClause = "?where=OFFENSE+%3D%27ROBBERY%27";
+        var layerIDs = [];
+
+        $('#title').text("DC Crime Incidents - 2015");
+        /*
+        $('#subtitle1').html('<a id="a1" >Geojson API</a>');
+        $("#a1").attr("href", geojson_url);
+        $("#a1").attr('title', geojson_url);
+
+        $('#subtitle2').html('<a id="a2" >Data Source</a>');
+        $("#a2").attr("href", daraSource_url);
+        $("#a2").attr('title', daraSource_url);
+        */
+        $('#subtitle3').text(instruction);
+
+        //mapboxgl.accessToken = token_DCCrimeIncidents;
+        mapboxgl.accessToken = 'pk.eyJ1IjoieXVuamllIiwiYSI6ImNpZnd0ZjZkczNjNHd0Mm0xcGRoc21nY28ifQ.8lFXo9aC9PfoKQF9ywWW-g';
+
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v8',
+            center: [-77.034084142948, 38.909671288923],
+            zoom: 12
+        });
+
+        var popup = new mapboxgl.Popup({
+            closeOnClick: false,
+            closeButton: false
+        });
+
+        var monthLabel = document.getElementById('month');
+        var curMonth;
+        var newMonth;
+        var monCount = 0;
+        var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+        var offenseType = ["ARSON", "ASSAULT W/DANGEROUS WEAPON", "BURGLARY", "HOMICIDE", "MOTOR VEHICLE THEFT", "ROBBERY", "SEX ABUSE", "THEFT F/AUTO", "THEFT/OTHER"];
+        var ARSOnIcon = 'url(images/arson_sym.gif)',
+                ASSAULTIcon = 'url(images/adw_gun_sym.gif)',
+                BURGLARYIcon = 'url(images/burglary_sym.gif)',
+                HOMICIDEIcon = 'url(images/homicide_sym.gif)',
+                MOTORIcon = 'url(images/stolen_auto_sym.gif)',
+                ROBBERYIcon = 'url(images/robbery_sym.gif)',
+                SEXABUSEIcon = 'url(images/sex_abuse_sym.gif)',
+                THEFTAUTOIcon = 'url(images/theft_from_auto_sym.gif)',
+                THEFTOTHERIcon = 'url(images/theft_sym.gif)';
+
+        var downloadedData = {};
+        var markerCollection = [];
+
+        function filterBy(month) {
+            popup.remove();
+
+            var filters = [
+                "all",
+                ["==", "month", month]
+            ];
+
+            monthLabel.textContent = months[month];
+        }
+
+        map.on('load', function () {
+            var start, end;
+            //2015 DC Crime data
+            $.getJSON(geojson_url + whereClause, function (data) {
+                if (!data || !data.features) {
+                    console.log("data is not downloaded");
+                    $("#download").text("Data is not downloaded, please refresh page!");
+                }
+                else {
+
+                    downloadedData = data;
+                    console.log("geojson data downloaded");
+
+                    $('.blocker').remove();
+                    $('#month').show();
+                    $('#slider').show();
+
+                    var slider = document.getElementById("slider");
+                    slider.value = 0;
+
+                    data.features = data.features.map(function (d) {
+                        var tmp = Date.parse(d.properties.REPORTDATETIME);
+                        d.properties.month = new Date(tmp).getMonth();
+                        return d;
+                    });
+
+                    var filteredData = {};
+                    var selectedData = [];
+
+                    $.each(data.features, function (i, d) {
+                        if (d.properties.month == 0) {
+                            selectedData.push(d);
+                        }
+                    });
+
+                    filteredData.features = selectedData;
+                    filteredData.type = "FeatureCollection";
+                    addCluster(filteredData);
+                    curMonth = 0;
+                    filterBy(0);
+
+                    document.getElementById('slider').addEventListener('input', function (e) {
+                        var month = parseInt(e.target.value, 10);
+                        setMonth(month);
+                        filterBy(month);
+                        resetSource(month);
+                        addLegend(month);
+                    });
+
+                    map.on('mousemove', function (e) {
+                        var features = map.queryRenderedFeatures(e.point, { layers: layerIDs });
+                        map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+                    });
+
+                    map.on('click', function (e) {
+                        var features = map.queryRenderedFeatures(e.point, { layers: layerIDs });
+                        popup.remove();
+
+                        if (!features.length) {
+                            popup.remove();
+                            return;
+                        }
+
+                        if ((features.length == 1) && (!features[0].properties.point_count)) {
+                            var feature = features[0];
+
+                            var cont = "Time: " + feature.properties.REPORTDATETIME + "<br>Crime: " + feature.properties.OFFENSE + "<br>Location: " + feature.properties.BLOCKSITEADDRESS;
+                            var coords = feature.geometry.coordinates;
+                            var ll = new mapboxgl.LngLat(coords[0], coords[1]);
+                            var wrapped = ll.wrap();
+
+                            popup.setLngLat(wrapped)
+                                .setHTML(cont)
+                                .addTo(map);
+                        }
+                    });
+                }
+            });
+
+            setTimeout(function () {
+                start = +new Date();
+                $.getJSON(geojson_url, function (wholedata) {
+                    if (wholedata) {
+                        console.log("whole geojson data downloaded");
+
+                        $('.blocker').remove();
+                        $('#month').show();
+                        $('#slider').show();
+
+                        var slider = document.getElementById("slider");
+                        slider.value = 0;
+
+                        wholedata.features = wholedata.features.map(function (d) {
+                            var tmp = Date.parse(d.properties.REPORTDATETIME);
+                            d.properties.month = new Date(tmp).getMonth();
+                            return d;
+                        });
+
+                        end = +new Date();
+                        var diff = end - start;
+                        console.log("downlaod whole data cost " + diff / 1000 + " secons");
+                        downloadedData = wholedata;
+                        reLoadLayer(0);
+                        addLegend(0);
+                        $("#pieChart").css("display", "block");
+                        $("#barChart").css("display", "block");
+                        $("#lineChart").css("display", "block");
+                        dsPieChart(downloadedData.features);
+                        dsBarChart_init(downloadedData.features);
+
+                    }
+                });
+            }, 1000);
+
+            map.on('zoom', function () {
+                var zoom = map.getZoom();
+                console.log("zoom = " + zoom);
+
+                if (zoom > 14) {
+                    if (map.getLayer("non-cluster-markers")) {
+                        map.removeLayer("non-cluster-markers");
+                    }
+
+                    removeMarkers(markerCollection);
+                    addMarkers(downloadedData);
+
+                }
+                else {
+                    removeMarkers(markerCollection);
+                }
+            });
+        });
+
+        function resetSource(month) {
+            if (month == curMonth) {
+                return;
+            }
+
+            curMonth = month;
+            var zoom = map.getZoom();
+            console.log("in month of " + month + ", zoom = " + zoom);
+
+            if (zoom > 14) {
+                removeMarkers(markerCollection);
+                addMarkers(downloadedData);
+            }
+            else {
+                removeMarkers(markerCollection);
+
+                if (map.getSource("crimes")) {
+                    map.removeSource("crimes");
+                }
+
+                if (map.getLayer("non-cluster-markers")) {
+                    map.removeLayer("non-cluster-markers");
+                }
+
+                var filteredData = {};
+                var selectedData = [];
+
+                $.each(downloadedData.features, function (i, d) {
+                    if (d.properties.month == month) {
+                        selectedData.push(d);
+                    }
+                });
+
+                filteredData.features = selectedData;
+
+                filteredData.type = "FeatureCollection";
+                addCluster(filteredData);
+            }
+        }
+
+        function addMarkers(downloadedData) {
+            var filteredData = {};
+            var selectedData = [];
+
+            $.each(downloadedData.features, function (i, d) {
+                if (d.properties.month == curMonth) {
+                    selectedData.push(d);
+                }
+            });
+
+            console.log("in addMarkers, curMontg = " + curMonth + ", downloaded data length = " + downloadedData.features.length + ", selectedData length = " + selectedData.length);
+
+            selectedData.forEach(function (feature) {
+                var offense = feature.properties.OFFENSE;
+                var marker = getOffenceMarker(offense);
+                $(marker).attr('data-latlon', feature.geometry.coordinates);
+                marker['data-properties'] = feature.properties;
+                markerCollection.push(marker);
+                new mapboxgl.Marker(marker)
+                        .setLngLat(feature.geometry.coordinates)
+                        .addTo(map);
+            });
+
+            $('.marker').click(function (e) {
+                e.stopPropagation();
+                popup.remove();
+
+                var cont = "Crime: " + this['data-properties'].OFFENSE + "<br>Time: " + this['data-properties'].REPORTDATETIME + "<br>Location: " + this['data-properties'].BLOCKSITEADDRESS;
+                var latlon = $(this).attr('data-latlon').split(",");
+                var latlon = $(this).attr('data-latlon').split(",");
+                latlon = [Number(latlon[0]), Number(latlon[1])];
+
+                popup.setLngLat((latlon))
+                    .setHTML(cont)
+                    .addTo(map);
+
+            });
+        }
+
+        function removeMarkers(markerCollection) {
+            if (markerCollection.length > 0) {
+                markerCollection.forEach(function (marker) {
+                    marker.remove();
+                });
+            }
+        }
+
+        function getOffenceMarker(offense) {
+            var iconUrl = getIconUrl(offense);
+            var marker = document.createElement('div');
+            marker.className = 'marker';
+
+            marker.style.backgroundImage = iconUrl;
+            marker.style.width = '12px';
+            marker.style.height = '10px';
+
+            return marker;
+        }
+
+        function getIconUrl(offense) {
+            var iconUrl = '';
+            switch (offense) {
+                case "ARSON":
+                    iconUrl = ARSOnIcon;
+                    break;
+                case "ASSAULT W/DANGEROUS WEAPON":
+                    iconUrl = ASSAULTIcon;
+                    break;
+                case "BURGLARY":
+                    iconUrl = BURGLARYIcon;
+                    break;
+                case "HOMICIDE":
+                    iconUrl = HOMICIDEIcon;
+                    break;
+                case "MOTOR VEHICLE THEFT":
+                    iconUrl = MOTORIcon;
+                    break;
+                case "ROBBERY":
+                    iconUrl = ROBBERYIcon;
+                    break;
+                case "SEX ABUSE":
+                    iconUrl = SEXABUSEIcon;
+                    break;
+                case "THEFT F/AUTO":
+                    iconUrl = THEFTAUTOIcon;
+                    break;
+                case "THEFT/OTHER":
+                    iconUrl = THEFTOTHERIcon;
+                    break;
+                default:
+                    iconUrl = '';
+            }
+
+            return iconUrl;
+        }
+
+        function addCluster(filteredData) {
+            map.addSource('crimes', {
+                'type': 'geojson',
+                cluster: true,
+                clusterMaxZoom: 13,
+                clusterRadius: 100,
+                'data': filteredData
+            });
+
+            var layerID = "non-cluster-markers";
+            layerIDs.push(layerID);
+
+            map.addLayer({
+                "id": layerID,
+                "type": "circle",
+                "source": "crimes",
+                "paint": {
+                    "circle-color": "red",
+                    "circle-opacity": 0.75,
+                    "circle-radius": 5
+                }
+            });
+
+            var lyrs = [
+                    [250, '#90d49a', 25],
+                    [100, '#f28cb1', 21],
+                    [20, '#f1f075', 18],
+                    [0, '#51bbd6', 15]
+            ];
+
+            lyrs.forEach(function (layer, i) {
+                map.addLayer({
+                    "id": "cluster-" + i,
+                    "type": "circle",
+                    "source": "crimes",
+                    "paint": {
+                        "circle-color": layer[1],
+                        "circle-radius": layer[2]
+                    },
+                    "filter": i == 0 ?
+                            [">=", "point_count", layer[0]] :
+                            ["all",
+                                [">=", "point_count", layer[0]],
+                                ["<", "point_count", lyrs[i - 1][0]]]
+                });
+            });
+
+            map.addLayer({
+                "id": "cluster-count",
+                "type": "symbol",
+                "source": "crimes",
+                "layout": {
+                    "text-field": "{point_count}",
+                    "text-font": [
+                                "DIN Offc Pro Medium",
+                                "Arial Unicode MS Bold"
+                    ],
+                    "text-size": 12
+                }
+            });
+
+        }
+
+
+        function reLoadLayer(month) {
+            if (map.getSource("crimes")) {
+                map.removeSource("crimes");
+            }
+
+            if (map.getLayer("non-cluster-markers")) {
+                map.removeLayer("non-cluster-markers");
+            }
+
+            var filteredData = {};
+            var selectedData = [];
+
+            $.each(downloadedData.features, function (i, d) {
+                if (d.properties.month == month) {
+                    selectedData.push(d);
+                }
+            });
+
+            filteredData.features = selectedData;
+
+            filteredData.type = "FeatureCollection";
+
+            addCluster(filteredData);
+
+            console.log("layer reloaded");
+        }
+
+        function setMonth(month) {
+            if (curMonth == month) {
+                curMonth = month;
+            }
+            else {
+                newMonth = month;
+            }
+        }
+
+        function addLegend(month) {
+            var stateLegendEl = document.getElementById('legendDiv');
+
+            while (stateLegendEl.firstChild) {
+                stateLegendEl.removeChild(stateLegendEl.firstChild);
+            }
+
+            var legend = document.createElement('div');
+            legend.id = 'legend';
+
+
+            var selectedData = [];
+            $.each(downloadedData.features, function (i, d) {
+                if (d.properties.month == month) {
+                    selectedData.push(d);
+                }
+            });
+
+            var title = document.createElement('div');
+            title.setAttribute("id", "titleDiv");
+            var titleContent = "<p>Crimes in " + months[month] + "    Total: " + selectedData.length + "</p>"
+            titleContent = titleContent.fontsize(3);
+            title.innerHTML = titleContent;
+            legend.appendChild(title);
+
+            for (var j = 0; j < offenseType.length; j++) {
+                var legendItem = document.createElement('div');
+                var selectedData = [];
+                var subOffense = offenseType[j];
+
+                $.each(downloadedData.features, function (i, d) {
+                    if ((d.properties.OFFENSE == subOffense) && (d.properties.month == month)) {
+                        selectedData.push(d);
+                    }
+                });
+
+                legendItem.innerHTML = ["<div class='img-sd' style='background-image:", getIconUrl(subOffense), "'></div>", offenseType[j], " ", selectedData.length].join("");
+                legend.appendChild(legendItem);
+            }
+
+            stateLegendEl.appendChild(legend);
+        }
+
+        $(window).bind("load", function () {
+
+        });
+
+    </script>
+
+    <script type="text/javascript">
+        var formatAsPercentage = d3.format("%"), formatAsInteger = d3.format(",");
+        var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+        function dsPieChart(features) {
+            var dataArray = [];
+            var dataArray2 = [];
+
+            for (var i = 0; i < 12; i++) {
+                var monthData = [];
+                dataArray.push(monthData);
+            }
+
+            for (var i = 0; i < 12; i++) {
+                features.forEach(function (feature) {
+                    if (feature.properties.month == i) {
+                        //return d;
+                        dataArray[i].push(feature);
+                    }
+                });
+            }
+
+            for (var i = 0; i < 12; i++) {
+                dataArray2[i] = (dataArray[i].length / features.length).toFixed(2);
+            }
+
+            var dataset = [
+            { category: "Jan", measure: dataArray2[0], month: months[0], features: dataArray[0] },
+             { category: "Feb", measure: dataArray2[1], month: months[1], features: dataArray[1] },
+              { category: "Mar", measure: dataArray2[2], month: months[2], features: dataArray[2] },
+               { category: "Apr", measure: dataArray2[3], month: months[3], features: dataArray[3] },
+                { category: "May", measure: dataArray2[4], month: months[4], features: dataArray[4] },
+                 { category: "Jun", measure: dataArray2[5], month: months[5], features: dataArray[5] },
+                  { category: "Jul", measure: dataArray2[6], month: months[6], features: dataArray[6] },
+                   { category: "Aug", measure: dataArray2[7], month: months[7], features: dataArray[7] },
+                    { category: "Sep", measure: dataArray2[8], month: months[8], features: dataArray[8] },
+                     { category: "Oct", measure: dataArray2[9], month: months[9], features: dataArray[9] },
+                      { category: "Nov", measure: dataArray2[10], month: months[10], features: dataArray[10] },
+                       { category: "Dec", measure: dataArray2[11], month: months[11], features: dataArray[11] }
+            ];
+
+            var datasetAll = { category: "All", measure: 1.00, month: "All", features: features };
+
+            var dataset3 = [
+            { category: "Jan", measure: (dataArray[0].length / features.length).toFixed(2) },
+             { category: "Feb", measure: (dataArray[1].length / features.length).toFixed(2) },
+              { category: "Mar", measure: (dataArray[2].length / features.length).toFixed(2) },
+               { category: "Apr", measure: (dataArray[3].length / features.length).toFixed(2) },
+                { category: "May", measure: (dataArray[4].length / features.length).toFixed(2) },
+                 { category: "Jun", measure: (dataArray[5].length / features.length).toFixed(2) },
+                  { category: "Jul", measure: (dataArray[6].length / features.length).toFixed(2) },
+                   { category: "Aug", measure: (dataArray[7].length / features.length).toFixed(2) },
+                    { category: "Sep", measure: (dataArray[8].length / features.length).toFixed(2) },
+                     { category: "Oct", measure: (dataArray[9].length / features.length).toFixed(2) },
+                      { category: "Nov", measure: (dataArray[10].length / features.length).toFixed(2) },
+                       { category: "Dec", measure: (dataArray[11].length / features.length).toFixed(2) }
+
+            ];
+
+            var width = 200, height = 200, outerRadius = Math.min(width, height) / 2, innerRadius = outerRadius * .999, innerRadiusFinal = outerRadius * .5,
+               innerRadiusFinal3 = outerRadius * .45, color = d3.scale.category20();
+
+            var vis = d3.select("#pieChart").append("svg:svg").data([dataset]).attr("width", width)
+                     .attr("height", height)
+                     .append("svg:g")
+                    .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")")
+            ;
+
+            var arc = d3.svg.arc()
+      .outerRadius(outerRadius).innerRadius(innerRadius);
+
+            var arcFinal = d3.svg.arc().innerRadius(innerRadiusFinal).outerRadius(outerRadius);
+            var arcFinal3 = d3.svg.arc().innerRadius(innerRadiusFinal3).outerRadius(outerRadius);
+
+            var pie = d3.layout.pie()
+                     .sort(null)
+                     .value(function (d) { return d.measure; });
+
+            var arcs = vis.selectAll("g.slice")
+                     .data(pie)
+                     .enter()
+                    .append("svg:g")
+                    .attr("class", "slice")
+                    .on("mouseover", mouseover)
+                    .on("mouseout", mouseout)
+                    .on("click", up)
+            ;
+
+            arcs.append("svg:path")
+             .attr("fill", function (d, i) { return color(i); })
+             .attr("d", arc)
+             .append("svg:title")
+             .text(function (d) { return d.data.month + ": " + formatAsPercentage(d.data.measure); });
+
+            d3.selectAll("g.slice").selectAll("path").transition()
+               .duration(750)
+               .delay(10)
+               .attr("d", arcFinal)
+            ;
+            arcs.filter(function (d) { return d.endAngle - d.startAngle > .2; })
+                .append("svg:text")
+                .attr("dy", ".35em")
+                .attr("text-anchor", "middle")
+                 .attr("transform", function (d) { return "translate(" + arcFinal.centroid(d) + ")rotate(" + angle(d) + ")"; })
+                .text(function (d) { return d.data.category; })
+            ;
+
+            function angle(d) {
+                var a = (d.startAngle + d.endAngle) * 90 / Math.PI - 90;
+                return a > 90 ? a - 180 : a;
+            }
+
+            vis.append("svg:text")
+               .attr("dy", ".35em")
+               .attr("text-anchor", "middle")
+               .text("2015")
+               .attr("class", "title")
+               .on("click", up2)
+            ;
+
+            function mouseover() {
+                d3.select(this).select("path").transition()
+                  .duration(750)
+                  .attr("d", arcFinal3)
+                ;
+            }
+
+            function mouseout() {
+                d3.select(this).select("path").transition()
+                  .duration(750)
+                 .attr("d", arcFinal)
+                ;
+            }
+
+            function up(d, i) {
+                updateBarChart(d.data.category, color(i), d.data.measure, d.data.month, d.data.features);
+            }
+
+            function up2(d, i) {
+                updateBarChart(datasetAll.category, "lightgrey", "1.00", "All", datasetAll.features);
+            }
+        }
+
+        var group = "All";
+        var datasetBarChart = [];
+        //var offenseType = ["ARSON", "ASSAULT W/DANGEROUS WEAPON", "BURGLARY", "HOMICIDE", "MOTOR VEHICLE THEFT", "ROBBERY", "SEX ABUSE", "THEFT F/AUTO", "THEFT/OTHER"];
+        var offenseType2 = ["Arson", "Assult", "Burglary", "Homeside", "Motor Theft", "Robbery", "Sex Abuse", "F/Auto", "Theft/Other"];
+
+        function dsBarChart_init(features) {
+            var monthArray = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var barArray = [];
+            var barArray2 = [];
+
+            for (var j = 0; j < offenseType.length; j++) {
+                var subOffense = offenseType[j];
+                var subOffense2 = offenseType2[j];
+                var typeObj = {};
+                barArray2 = [];
+
+                $.each(features, function (i, d) {
+                    if (d.properties.OFFENSE == subOffense) {
+                        barArray2.push(d);
+                    }
+                });
+
+                typeObj.group = "All";
+                typeObj.category = subOffense2;
+                typeObj.measure = barArray2.length;
+                datasetBarChart.push(typeObj);
+            }
+
+            for (var k = 0; k < 12; k++) {
+                for (var j = 0; j < offenseType.length; j++) {
+                    var subOffense = offenseType[j];
+                    var subOffense2 = offenseType2[j];
+                    var selectedData = [];
+                    var typeObj = {};
+                    barArray2 = [];
+
+                    $.each(features, function (i, d) {
+                        if ((d.properties.OFFENSE == subOffense) && (d.properties.month == k)) {
+                            barArray2.push(d);
+                        }
+                    });
+
+                    typeObj.group = monthArray[k];
+                    typeObj.category = subOffense2;
+                    typeObj.measure = barArray2.length;
+                    datasetBarChart.push(typeObj);
+                }
+            }
+
+            dsBarChart(datasetBarChart, features)
+        }
+
+        function datasetBarChosen(group) {
+            var ds = [];
+            for (x in datasetBarChart) {
+                if (datasetBarChart[x].group == group) {
+                    ds.push(datasetBarChart[x]);
+                }
+            }
+            return ds;
+        }
+
+
+        function dsBarChartBasics() {
+
+            var margin = { top: 30, right: 10, bottom: 15, left: 10 },
+                           width = 600 - margin.left - margin.right,
+                           height = 180 - margin.top - margin.bottom,
+                           colorBar = d3.scale.category20(),
+                           barPadding = 1
+            ;
+
+            return {
+                margin: margin,
+                width: width,
+                height: height,
+                colorBar: colorBar,
+                barPadding: barPadding
+            }
+            ;
+        }
+
+        function dsBarChart(datasetBarChart, features) {
+            var firstDatasetBarChart = datasetBarChosen(group);
+            var basics = dsBarChartBasics();
+            var margin = basics.margin,
+                width = basics.width,
+                height = basics.height,
+                colorBar = basics.colorBar,
+                barPadding = basics.barPadding
+            ;
+
+            var xScale = d3.scale.linear()
+                           .domain([0, firstDatasetBarChart.length])
+                           .range([0, width])
+            ;
+            var yScale = d3.scale.linear()
+                           .domain([0, d3.max(firstDatasetBarChart, function (d) { return d.measure; })])
+                           .range([height, 0])
+            ;
+            var svg = d3.select("#barChart")
+                        .append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .attr("id", "barChartPlot")
+            ;
+
+            var plot = svg.append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            ;
+
+            plot.selectAll("rect")
+                .data(firstDatasetBarChart)
+                .enter()
+                .append("rect")
+                .attr("x", function (d, i) {
+                    return xScale(i);
+                })
+              .attr("width", width / firstDatasetBarChart.length - barPadding)
+              .attr("y", function (d) {
+                  return yScale(d.measure);
+              })
+           .attr("height", function (d) {
+               return height - yScale(d.measure);
+           })
+           .attr("fill", "lightgrey")
+            ;
+            plot.selectAll("text")
+                .data(firstDatasetBarChart)
+               .enter()
+               .append("text")
+               .text(function (d) {
+                   return formatAsInteger(d3.round(d.measure));
+               })
+               .attr("text-anchor", "middle")
+               .attr("x", function (d, i) {
+                   return (i * (width / firstDatasetBarChart.length)) + ((width / firstDatasetBarChart.length - barPadding) / 2);
+               })
+             .attr("y", function (d) {
+                 return yScale(d.measure) - 5;
+             })
+             .attr("class", "yAxis")
+            ;
+
+            var xLabels = svg.append("g")
+                             .attr("transform", "translate(" + margin.left + "," + (margin.top + height) + ")")
+            ;
+            xLabels.selectAll("text.xAxis")
+                   .data(firstDatasetBarChart)
+                   .enter()
+                   .append("text")
+                   .text(function (d) { return d.category; })
+                   .attr("text-anchor", "middle")
+                   .attr("x", function (d, i) {
+                       return (i * (width / firstDatasetBarChart.length)) + ((width / firstDatasetBarChart.length - barPadding) / 2);
+                   })
+                   .attr("y", 15)
+                   .attr("class", "xAxis")
+            ;
+
+            svg.append("text").attr("x", (width + margin.left + margin.right) / 2)
+               .attr("y", 25)
+               .attr("class", "title")
+               .attr("text-anchor", "middle")
+               .text("Overall Crime Incidents 2015: " + features.length)
+            ;
+        }
+
+        function updateBarChart(group, colorChosen, measure, month, features) {
+
+            var currentDatasetBarChart = datasetBarChosen(group);
+
+            var basics = dsBarChartBasics();
+
+            var margin = basics.margin,
+                 width = basics.width,
+                height = basics.height,
+                colorBar = basics.colorBar,
+                barPadding = basics.barPadding
+            ;
+
+            var xScale = d3.scale.linear()
+                                 .domain([0, currentDatasetBarChart.length])
+                                 .range([0, width])
+            ;
+
+            var yScale = d3.scale.linear()
+                           .domain([0, d3.max(currentDatasetBarChart, function (d) { return d.measure; })])
+                           .range([height, 0])
+            ;
+
+            var svg = d3.select("#barChart svg");
+
+            var plot = d3.select("#barChartPlot")
+                         .datum(currentDatasetBarChart)
+            ;
+
+            plot.selectAll("rect")
+                .data(currentDatasetBarChart)
+                .transition()
+                .duration(750)
+                .attr("x", function (d, i) {
+                    return xScale(i);
+                })
+                .attr("width", width / currentDatasetBarChart.length - barPadding)
+                .attr("y", function (d) {
+                    return yScale(d.measure);
+                })
+                .attr("height", function (d) {
+                    return height - yScale(d.measure);
+                })
+               .attr("fill", colorChosen)
+            ;
+
+            plot.selectAll("text.yAxis")
+                .data(currentDatasetBarChart)
+                .transition()
+                .duration(750)
+                .attr("text-anchor", "middle")
+                .attr("x", function (d, i) {
+                    return (i * (width / currentDatasetBarChart.length)) + ((width / currentDatasetBarChart.length - barPadding) / 2);
+                })
+                .attr("y", function (d) {
+                    return yScale(d.measure) - 5;
+                })
+                 .text(function (d) {
+                     return formatAsInteger(d3.round(d.measure));
+                 })
+                 .attr("class", "yAxis")
+            ;
+
+            if (month != "All") {
+                svg.selectAll("text.title")
+                   .attr("x", (width + margin.left + margin.right) / 2)
+                   .attr("y", 25)
+                   .attr("class", "title")
+                   .attr("text-anchor", "middle")
+                    .text("Crime Incident in " + month + " 2015: " + features.length + " (" + formatAsPercentage(measure) + ")")
+                ;
+            }
+            else if (month == "All") {
+                svg.selectAll("text.title")
+                   .attr("x", (width + margin.left + margin.right) / 2)
+                   .attr("y", 25)
+                   .attr("class", "title")
+                   .attr("text-anchor", "middle")
+                   .text("Overall Crime Incidents 2015: " + features.length)
+                ;
+            }
+        }
+    </script>
+</body>
+</html>

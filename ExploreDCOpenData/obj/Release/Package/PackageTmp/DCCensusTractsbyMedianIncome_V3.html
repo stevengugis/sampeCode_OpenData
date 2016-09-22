@@ -1,0 +1,290 @@
+﻿<!DOCTYPE html>
+<html ng-app="plunker">
+<head>
+    <meta charset="utf-8" />
+    <title>DC Census Tracts by Median Income_V3</title>
+    <script>document.write('<base href="' + document.location + '" />');</script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD25tIuhRbn7F9DIeb4hUCr6g-8eTq9NUI&callback=initMap" async defer></script>
+    
+    <style>        
+         body {
+            margin: 0;
+            padding: 0;
+         }       
+
+         #map-canvas {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+          #legend {
+            background-color: #FFF;
+            margin: 10px;
+            padding: 5px;
+            width: 150px;
+        }
+
+            #legend p {
+                font-weight: bold;
+                margin-top: 3px;
+            }
+     
+            #legend div {
+                clear: both;
+            }
+        
+        .color {
+            height: 12px;
+            width: 12px;
+            margin-right: 3px;
+            float: left;
+            display: block;
+        }
+    </style>
+    <style>
+        .childbox1 {
+            font: 24px/1 Arial, sans-serif;
+            padding: 5px;
+            border: 0px solid black;
+            margin: 0px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFF;
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+
+        .childbox2 {
+            padding: 0px;
+            margin-left: 10px;
+            color: #FFF;
+            font-weight: normal;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            border: solid 0px red;
+        }
+
+        .map-overlay2 {
+            position: relative;
+            padding: 5px;
+            margin: auto;
+            width: 40%;
+            border-radius: 5px;
+            z-index: 300;
+            background-color: #50667f;
+            opacity: 0.8;
+        }
+    </style>
+
+    <script>
+        //reference: https://developers.google.com/fusiontables/docs/samples/dynamic_styling_template
+        var geojson_url = "http://opendata.dc.gov/datasets/b78d164649ad487db0f2b20a9261fb8c_17.geojson";       
+        var dataSource_url = "http://opendata.dc.gov/datasets/b78d164649ad487db0f2b20a9261fb8c_17";
+        var instruction = "Description: Scroll over census tracts for more information.";        
+
+        var columnStyle = [
+        {
+            'min': 0,
+            'max': 20000,
+            'color': '#38a800'
+        },
+        {
+            'min': 20000,
+            'max': 30000,
+            'color': '#8bd100'
+        },
+        {
+            'min': 30000,
+            'max': 50000,
+            'color': '#ffff00'
+        },
+        {
+            'min': 50000,
+            'max': 80000,
+            'color': '#ff8000'
+        },
+        {
+            'min': 80000,
+            'max': 100000,
+            'color': '#ff0000'
+        },
+        {
+            'min': 100000,
+            'max': 'plus',
+            'color': '#99004f'
+        }
+        ];
+
+        var map;
+        function initMap() {
+            $('#title').text("DC Census Tracts by Median Income");
+
+            $('#subtitle1').html('<a id="a1" >Geojson API</a>');
+            $("#a1").attr("href", geojson_url);
+            $("#a1").attr('title', geojson_url);
+
+            $('#subtitle2').html('<a id="a2" >Data Source</a>');
+            $("#a2").attr("href", dataSource_url);
+            $("#a2").attr('title', dataSource_url);
+
+            $('#subtitle3').text(instruction);
+
+            var latlngDC = new google.maps.LatLng(38.8951, -77.0367);	// Coordinates of Washington, DC (area centroid)
+
+            // Set the Map Options to be applied when the map is set.
+            var mapOptions = {
+                zoom: 12,
+                scrollwheel: true,
+                //center: new google.maps.LatLng(40.00, -98),
+                center: latlngDC,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                mapTypeControl: false,
+                mapTypeControlOptions: {
+                    mapTypeIds: [google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.TERRAIN]
+                }
+            }
+
+            // Set a blank infoWindow to be used for each to state on click
+            var infoWindow = new google.maps.InfoWindow({
+                content: ""
+            });
+
+            // Set the map to the element ID and give it the map options to be applied
+            map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+            // Create the state data layer and load the GeoJson Data
+            var stateLayer = new google.maps.Data();
+            //stateLayer.loadGeoJson('https://gist.githubusercontent.com/dmarg/b2959e771ae680acbc95/raw/815a03f55d028dace4371c27d0b787ca0f2f2b5d/states.json');
+            stateLayer.loadGeoJson(geojson_url);
+
+            // Set and apply styling to the stateLayer
+            stateLayer.setStyle(function (feature) {
+                return {
+                    fillColor: getColor(feature.getProperty('FAGI_MEDIAN_2006')), // call function to get color for state based on the COLI (Cost of Living Index)
+                    fillOpacity: 0.6,
+                    strokeColor: '#b3b3b3',
+                    strokeWeight: 1,
+                    zIndex: 1
+                };
+            });
+
+            // Add mouseover and mouse out styling for the GeoJSON State data
+            stateLayer.addListener('mouseover', function (e) {
+                stateLayer.overrideStyle(e.feature, {
+                    strokeColor: '#F01141',
+                    strokeWeight: 4,
+                    zIndex: 2
+                });
+            });
+
+            stateLayer.addListener('mouseout', function (e) {
+                stateLayer.revertStyle();
+            });
+
+            // Adds an info window on click with in a state that includes the state name and COLI
+            stateLayer.addListener('mouseover', function (e) {
+                console.log(e);
+                infoWindow.setContent('<div style="line-height:1.00;overflow:hidden;white-space:nowrap;">' + '<b>Census Tract: ' +
+                  e.feature.getProperty('NAME') + '</b><hr><br> Population: ' +                  
+                  e.feature.getProperty('TOTAL') + '<br> Area (Sq. Mi.): ' +
+                  e.feature.getProperty('AREASQMI') + '<br> 2006 Median Income: ' +
+                  e.feature.getProperty('FAGI_MEDIAN_2006') + '</div>');
+
+                var anchor = new google.maps.MVCObject();
+                anchor.set("position", e.latLng);
+                infoWindow.open(map, anchor);
+            });
+
+
+            // Final step here sets the stateLayer GeoJSON data onto the map
+            stateLayer.setMap(map);
+
+            // returns a color based on the value given when the function is called
+            function getColor(FAGI_MEDIAN_2006) {
+                var colors = [
+                  '#38a800',
+                  '#8bd100',
+                  '#ffff00',
+                  '#ff8000',
+                  '#ff0000',
+                  '#99004f'
+                ];
+
+                return FAGI_MEDIAN_2006 >= 100000 ? colors[5] :
+                  FAGI_MEDIAN_2006 > 80000 ? colors[4] :
+                  FAGI_MEDIAN_2006 > 50000 ? colors[3] :
+                  FAGI_MEDIAN_2006 > 30000 ? colors[2] :
+                  FAGI_MEDIAN_2006 > 20000 ? colors[1] :
+                  colors[0];
+            }
+
+            addLegend(map);
+        }
+
+        // Initialize the legend
+        function addLegend(map) {
+            var legendWrapper = document.createElement('div');
+            legendWrapper.id = 'legendWrapper';
+            legendWrapper.index = 1;
+            map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(
+                legendWrapper);
+            legendContent(legendWrapper);
+        }
+
+        // Generate the content for the legend
+        function legendContent(legendWrapper) {
+            var legend = document.createElement('div');
+            legend.id = 'legend';
+            // var legend = document.getElementById("legendDiv");
+
+            var title = document.createElement('p');
+            title.innerHTML = "Family Median Income";
+            legend.appendChild(title);
+
+            //var columnStyle = COLUMN_STYLES[column];
+            //var columnStyle = units;
+            for (var i in columnStyle) {
+                var style = columnStyle[i];
+
+                var legendItem = document.createElement('div');
+
+                var color = document.createElement('span');
+                color.setAttribute('class', 'color');
+                color.style.backgroundColor = style.color;
+                legendItem.appendChild(color);
+
+                var minMax = document.createElement('span');
+                minMax.innerHTML = style.min + ' - ' + style.max;
+                legendItem.appendChild(minMax);
+
+                legend.appendChild(legendItem);
+            }
+
+            legendWrapper.appendChild(legend);
+        }
+
+
+    </script>
+</head>
+<body>
+    <div id="map-canvas">
+       
+    </div>
+    <div class='map-overlay2'>
+        <div id="title" class="childbox1">
+        </div>
+        <div id="subtitle1" class="childbox2">
+        </div>
+        <div id="subtitle2" class="childbox2">
+        </div>
+        <div id="subtitle3" class="childbox2">
+        </div>
+    </div>
+    
+</body>
+</html>
+
+

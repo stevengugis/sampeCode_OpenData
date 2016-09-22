@@ -1,0 +1,130 @@
+﻿<html>
+<head>
+    <title>DC Wards</title>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <link rel="polygon" type="application/json" href="http://opendata.dc.gov/datasets/0ef47379cbae44e88267c01eaec2ff6e_31.geojson">
+    <style>
+        #map {
+            height: 100%;
+        }
+    </style>
+    <style>
+        .childbox1 {
+            font: 28px/1 Arial, sans-serif;
+            padding: 12px;
+            border: 0px solid black;
+            margin: 0px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFF;
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+
+        .childbox2 {
+            padding: 0px;
+            margin-left: 10px;
+            color: #FFF;
+            font-weight: normal;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            border: solid 0px red;
+        }
+
+        .map-overlay2 {
+            position: relative;
+            padding: 5px;
+            margin: auto;
+            width: 40%;
+            border-radius: 5px;
+            z-index: 300;
+            background-color: #50667f;
+            opacity: 0.8;
+        }
+
+        a:link {
+            color: white;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+
+        a:visited {
+            color: yellow;
+            background-color: transparent;
+            text-decoration: none;
+        }
+
+        a:hover {
+            font-weight: bold;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="map">
+        <div class='map-overlay2'>
+            <div id="title" class="childbox1">
+            </div>
+            <div id="subtitle1" class="childbox2">
+            </div>
+            <div id="subtitle2" class="childbox2">
+            </div>
+            <div id="subtitle3" class="childbox2">
+            </div>
+        </div>
+    </div>
+    <script>
+        var geojson_url = "http://opendata.dc.gov/datasets/0ef47379cbae44e88267c01eaec2ff6e_31.geojson";
+        var dataSource_url = "http://opendata.dc.gov/datasets/0ef47379cbae44e88267c01eaec2ff6e_31";
+        var instruction = "Instructions: Click a ward on the map to display info.";
+
+        $('#title').text("DC Wards");
+
+        $('#subtitle1').html('<a id="a1" >Geojson API</a>');
+        $("#a1").attr("href", geojson_url);
+        $("#a1").attr('title', geojson_url);
+
+        $('#subtitle2').html('<a id="a2" >Data Source</a>');
+        $("#a2").attr("href", dataSource_url);
+        $("#a2").attr('title', dataSource_url);
+
+        $('#subtitle3').text(instruction);
+
+        var map = L.map('map').setView([38.8929, -77.0252], 12);
+
+        // L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+        L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {
+          attribution: 'Tiles by <a href="http://mapc.org">MAPC</a>, Data by <a href="http://mass.gov/mgis">MassGIS</a>',
+          maxZoom: 17,
+          minZoom: 9
+      }).addTo(map);
+
+        function style(feature) {
+            return {
+                weight: 2,
+                opacity: 0.8,
+                color: 'blue',
+                fillOpacity: 0.0
+            };
+        }
+
+        $.getJSON($('link[rel="polygon"]').attr("href"), function (data) {
+            var geojson = L.geoJson(data, {
+                style: style,
+                onEachFeature: function (feature, layer) {
+                    layer.bindPopup(feature.properties.NAME + "<br>" + "REP Name: " + feature.properties.REP_NAME + "<br>" + "REP Phone: " + feature.properties.REP_PHONE + "<br>" + "Area: " + feature.properties.AREASQMI + " Sqaure Miles")
+                }
+            });
+
+            geojson.addTo(map);
+
+        });
+
+    </script>
+</body>
+</html>

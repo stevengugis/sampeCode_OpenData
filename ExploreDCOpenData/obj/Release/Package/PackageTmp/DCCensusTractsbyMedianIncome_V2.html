@@ -1,0 +1,259 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>DC Census Tracts by Median Income</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.17/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.17/esri/css/esri.css">
+    <style>       
+         body {
+            margin: 0;
+            padding: 0;
+        }       
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .chart {
+            width: 200px;
+            height: 200px;
+            padding: 0px !important;
+        }
+
+        #info {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            padding: 10px;
+            background-color: #ddd;
+            font: 14px Segoe UI;
+            width: 200px;
+            text-align: center;
+            border-radius: 0 10px 0 0;
+        }
+    </style>
+    <style>
+        .childbox1 {
+            font: 24px/1 Arial, sans-serif;
+            padding: 5px;
+            border: 0px solid black;
+            margin: 0px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFF;
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+
+        .childbox2 {
+            padding: 0px;
+            margin-left: 10px;
+            color: #FFF;
+            font-weight: normal;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            border: solid 0px red;
+        }
+
+        .map-overlay2 {
+            position: relative;
+            padding: 5px;
+            margin: auto;
+            width: 40%;
+            border-radius: 5px;
+            z-index: 300;
+            background-color: #50667f;
+            opacity: 0.8;
+        }
+    </style>
+    <script src="https://js.arcgis.com/3.17/"></script>
+    <script src="http://esri.github.io/geojson-layer-js/vendor/terraformer/terraformer.min.js"></script>
+    <script src="http://esri.github.io/geojson-layer-js/vendor/terraformer-arcgis-parser/terraformer-arcgis-parser.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
+    <script>
+        var map;
+        // Try other themes: Julie, CubanShirts, PrimaryColors, Charged, BlueDusk, Bahamation, Harmony, Shrooms
+        var theme = "Wetland";
+        require([
+          "esri/map", "esri/layers/FeatureLayer",
+          "esri/dijit/InfoWindow", "esri/InfoTemplate",
+          "esri/symbols/SimpleFillSymbol", "esri/renderers/SimpleRenderer",
+          "dijit/layout/ContentPane", "dijit/layout/TabContainer",
+          "dojox/charting/Chart2D", "dojox/charting/plot2d/Pie",
+          "dojox/charting/action2d/Highlight", "dojox/charting/action2d/MoveSlice", "dojox/charting/action2d/Tooltip",
+          "dojox/charting/themes/" + theme,
+          "http://esri.github.io/geojson-layer-js/src/geojsonlayer.js",
+          //"src/geojsonlayer.js",
+           "esri/symbols/SimpleLineSymbol",
+            "esri/Color", "esri/lang", "esri/graphic", "dojo/dom-style",
+             "esri/dijit/Legend",
+          "esri/renderers/ClassBreaksRenderer",
+          "dijit/TooltipDialog", "dijit/popup",
+          "dojo/dom-construct", "dojo/dom-class",
+          "dojo/number", "dojo/domReady!"
+        ], function (
+          Map, FeatureLayer,
+          InfoWindow, InfoTemplate,
+          SimpleFillSymbol, SimpleRenderer,
+          ContentPane, TabContainer,
+          Chart2D, Pie,
+          Highlight, MoveSlice, Tooltip,
+          dojoxTheme, GeoJsonLayer, SimpleLineSymbol, Color, esriLang, Graphic, domStyle,
+           Legend,
+          ClassBreaksRenderer,
+          TooltipDialog, dijitPopup,
+          domConstruct, domClass,
+          number, parser
+        ) {
+            var geojson_url = "http://opendata.dc.gov/datasets/b78d164649ad487db0f2b20a9261fb8c_17.geojson";
+            var dataSource_url = "http://opendata.dc.gov/datasets/b78d164649ad487db0f2b20a9261fb8c_17";
+            var instruction = "Description: Scroll over census tracts for more information.";
+
+            $('#title').text("DC Census Tracts by Median Income");
+
+            $('#subtitle1').html('<a id="a1" >Geojson API</a>');
+            $("#a1").attr("href", geojson_url);
+            $("#a1").attr('title', geojson_url);
+
+            $('#subtitle2').html('<a id="a2" >Data Source</a>');
+            $("#a2").attr("href", dataSource_url);
+            $("#a2").attr('title', dataSource_url);
+
+            $('#subtitle3').text(instruction);
+
+            // Use the info window instead of the popup.
+            var infoWindow = new InfoWindow(null, domConstruct.create("div"));
+            infoWindow.startup();
+
+            map = new Map("map", {
+                basemap: "gray",
+                center: [-122.5, 45.5],
+                infoWindow: infoWindow,
+                zoom: 5
+            });
+            map.infoWindow.resize(275, 275);
+
+            var symbol = new SimpleFillSymbol();
+            symbol.setColor(new Color([150, 150, 150, 0.5]));
+
+            var renderer = new ClassBreaksRenderer(symbol, "FAGI_MEDIAN_2006");
+            renderer.addBreak(0, 20000, new SimpleFillSymbol().setColor(new Color([56, 168, 0, 0.5])));
+            renderer.addBreak(20000, 30000, new SimpleFillSymbol().setColor(new Color([139, 209, 0, 0.5])));
+            renderer.addBreak(30000, 50000, new SimpleFillSymbol().setColor(new Color([255, 255, 0, 0.5])));
+            renderer.addBreak(50000, 80000, new SimpleFillSymbol().setColor(new Color([255, 128, 0, 0.5])));
+            renderer.addBreak(80000, 100000, new SimpleFillSymbol().setColor(new Color([255, 0, 0, 0.5])));
+            renderer.addBreak(100000, "Higher", new SimpleFillSymbol().setColor(new Color([153, 0, 79, 0.5])));
+
+            var featureLayer = new FeatureLayer("http://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Demographic_WebMercator/MapServer/17", {
+                mode: FeatureLayer.MODE_SNAPSHOT,
+                outFields: ["*"]
+            });
+
+            featureLayer.setRenderer(renderer);
+
+
+            var legend = new Legend({
+                map: map,
+                layerInfos: [{ title: "Family Meidan Income", layer: featureLayer }]
+            }, "legend");
+
+            function addGeoJsonLayer(url) {
+                // Create the layer
+                var geoJsonLayer = new GeoJsonLayer({
+                    url: url,
+                    //infoTemplate: template,
+                    maxdraw: 10000
+                });
+
+                geoJsonLayer._simplePolygonSym = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 0, 0, 0.9]), 1), new Color([150, 255, 150, 0.0]));
+
+                // Zoom to layer
+                geoJsonLayer.on("update-end", function (e) {
+                    map.setExtent(e.target.extent.expand(1.2));
+                });
+                // Add to map
+                map.addLayer(geoJsonLayer);
+            }
+
+            map.infoWindow.resize(245, 125);
+
+            dialog = new TooltipDialog({
+                id: "tooltipDialog",
+                style: "position: absolute; width: 250px; font: normal normal normal 10pt Helvetica;z-index:100"
+            });
+            dialog.startup();
+
+            var highlightSymbol = new SimpleFillSymbol(
+              SimpleFillSymbol.STYLE_SOLID,
+              new SimpleLineSymbol(
+                SimpleLineSymbol.STYLE_SOLID,
+                new Color([255, 0, 0]), 3
+              ),
+              new Color([125, 125, 125, 0.35])
+            );
+
+            //listen for when the onMouseOver event fires on the GraphicsLayer
+            //when fired, create a new graphic with the geometry from the event.graphic and add it to the maps graphics layer
+            featureLayer.on("mouse-over", function (evt) {
+                var t = "<b>Census Tract: ${NAME}</b><hr>"
+                    + "<b>Population: </b>${TOTAL:NumberFormat}<br>"
+                  + "<b>Area (Sq. Mi.): </b>${AREASQMI:NumberFormat}<br>"
+                  //+ "<b>2005 Median Income: </b>${FAGI_MEDIAN_2005:NumberFormat}<br>"
+                  + "<b>2006 Median Income: </b>${FAGI_MEDIAN_2006:NumberFormat}";
+
+                var content = esriLang.substitute(evt.graphic.attributes, t);
+                var highlightGraphic = new Graphic(evt.graphic.geometry, highlightSymbol);
+                map.graphics.add(highlightGraphic);
+
+                dialog.setContent(content);
+
+                domStyle.set(dialog.domNode, "opacity", 0.85);
+                dijitPopup.open({
+                    popup: dialog,
+                    x: evt.pageX,
+                    y: evt.pageY
+                });
+            });
+
+            function closeDialog() {
+                map.graphics.clear();
+                dijitPopup.close(dialog);
+            }
+
+            map.on("load", function () {
+                addGeoJsonLayer(geojson_url);
+
+                map.addLayer(featureLayer);
+                legend.startup();
+
+                map.graphics.enableMouseEvents();
+                map.graphics.on("mouse-out", closeDialog);
+
+            });
+        });
+    </script>
+</head>
+
+<body class="claro">
+    <div id="map">        
+    </div>
+    <div class='map-overlay2'>
+        <div id="title" class="childbox1">
+        </div>
+        <div id="subtitle1" class="childbox2">
+        </div>
+        <div id="subtitle2" class="childbox2">
+        </div>
+        <div id="subtitle3" class="childbox2">
+        </div>
+    </div>
+    <div id="info"><div id="legend"></div></div>
+</body>
+</html>

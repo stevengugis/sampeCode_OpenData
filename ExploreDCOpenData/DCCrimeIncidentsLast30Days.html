@@ -1,0 +1,148 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Crime Incidents - Last 30 Days</title>
+    <style>    
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map-container {
+            padding: 6px;
+            border-width: 1px;
+            border-style: solid;
+            border-color: #ccc #ccc #999 #ccc;
+            -webkit-box-shadow: rgba(64, 64, 64, 0.5) 0 2px 5px;
+            -moz-box-shadow: rgba(64, 64, 64, 0.5) 0 2px 5px;
+            box-shadow: rgba(64, 64, 64, 0.1) 0 2px 5px;
+            width: 600px;
+        }        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+    <style>
+        .childbox1 {
+            font: 24px/1 Arial, sans-serif;
+            padding: 5px;
+            border: 0px solid black;
+            margin: 0px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFF;
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+
+        .childbox2 {
+            padding: 0px;
+            margin-left: 10px;
+            color: #FFF;
+            font-weight: normal;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            border: solid 0px red;
+        }
+
+        .map-overlay2 {
+            position: relative;
+            padding: 5px;
+            margin: auto;
+            width: 40%;
+            border-radius: 5px;
+            z-index: 300;
+            background-color: #50667f;
+            opacity: 0.8;
+        }
+    </style>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD25tIuhRbn7F9DIeb4hUCr6g-8eTq9NUI"></script>
+    <script src="https://googlemaps.github.io/js-marker-clusterer/examples/data.json"></script>
+    <script type="text/javascript" src="https://googlemaps.github.io/js-marker-clusterer/src/markerclusterer.js"></script>
+
+    <script>
+        //reference" https://googlemaps.github.io/js-marker-clusterer/examples/simple_example.html
+        function initialize() {
+            var geojson_url = "http://opendata.dc.gov/datasets/dc3289eab3d2400ea49c154863312434_8.geojson";
+            var dataSource_url = "http://opendata.dc.gov/datasets/dc3289eab3d2400ea49c154863312434_8";
+            var instruction = "Description: Dispaly crime incidents of last 30 days in clustering.";
+
+            $('#title').text("Crime Incidents - Last 30 Days");
+
+            $('#subtitle1').html('<a id="a1" >Geojson API</a>');
+            $("#a1").attr("href", geojson_url);
+            $("#a1").attr('title', geojson_url);
+
+            $('#subtitle2').html('<a id="a2" >Data Source</a>');
+            $("#a2").attr("href", dataSource_url);
+            $("#a2").attr('title', dataSource_url);
+
+            $('#subtitle3').text(instruction);
+
+            var center = new google.maps.LatLng(38.8951, -77.0367);
+            var infowindow = new google.maps.InfoWindow();
+            var feature_count;
+            var markers = [];
+
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 12,
+          center: center,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+
+          //1. get datasets count:
+        $.get(geojson_url, function (data) {
+            feature_count = data.features.length;
+
+            //var markers = [];
+            for (var i = 0; i < feature_count; i++) {
+                var feature = data.features[i];
+                var latLng = new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+                var marker = new google.maps.Marker({
+                    position: latLng
+                });
+
+                markers.push(marker);
+
+                google.maps.event.addListener(marker, "click", function () {
+                    console.log("lat, lng: ");
+                    var cont = "Time: " + feature.properties.REPORTDATETIME + "<br>Crime: " + feature.properties.OFFENSE + "<br>Location: " + feature.properties.BLOCKSITEADDRESS;
+
+                    infowindow.setPosition(marker.getPosition());
+                    infowindow.setContent(cont);
+                    infowindow.open(map, this);
+                });
+            }
+            //var markerCluster = new MarkerClusterer(map, markers, { imagePath: '../images/m' })
+            var markerCluster = new MarkerClusterer(map, markers, { imagePath: 'images/m' })
+        });
+
+        $.each(markers, function (i, marker) {
+
+        });
+      }
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>   
+</head>
+<body>  
+    <div id="map-container"><div id="map"></div></div>
+
+    <div class='map-overlay2'>
+        <div id="title" class="childbox1">
+        </div>
+        <div id="subtitle1" class="childbox2">
+        </div>
+        <div id="subtitle2" class="childbox2">
+        </div>
+        <div id="subtitle3" class="childbox2">
+        </div>
+    </div>
+</body>
+</html>
+

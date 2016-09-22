@@ -1,0 +1,125 @@
+﻿<html>
+<head>
+  <title>Health Care Leaflet map</title>
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
+  <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <style>
+    #map{ height: 100% }
+  </style>
+    <style>
+        .childbox1 {
+            font: 28px/1 Arial, sans-serif;
+            padding: 12px;
+            border: 0px solid black;
+            margin: 0px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFF;
+            background-color: #50667f;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            opacity: 0.8;
+        }
+
+        .childbox2 {
+            padding: 0px;
+            margin-left: 10px;
+            color: #FFF;
+            font-weight: normal;
+            font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+            border: solid 0px red;
+        }
+
+        .map-overlay2 {
+            position: relative;
+            padding: 5px;
+            margin: auto;
+            width: 40%;
+            border-radius: 5px;
+            z-index: 300;
+            background-color: #50667f;
+            opacity: 0.8;
+        }
+
+        a:link {
+            color: white;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+
+        a:visited {
+            color: yellow;
+            background-color: transparent;
+            text-decoration: none;
+        }
+
+        a:hover {
+            font-weight: bold;
+            background-color: transparent;
+            text-decoration: underline;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div id="map">
+
+        <div class='map-overlay2'>
+            <div id="title" class="childbox1">
+            </div>
+            <div id="subtitle1" class="childbox2">
+            </div>
+            <div id="subtitle2" class="childbox2">
+            </div>
+            <div id="subtitle3" class="childbox2">
+            </div>
+        </div>
+    </div>
+  <script>
+      var geojson_url = "http://opendata.dc.gov/datasets/018890d7399245759f05c7932261ef44_7.geojson";
+      var dataSource_url = "http://opendata.dc.gov/datasets/018890d7399245759f05c7932261ef44_7";
+      var instruction = "Instruction: Click icon on the map to see Health Care center information.";
+
+      $('#title').text("DC Health Care");
+
+      $('#subtitle1').html('<a id="a1" >Geojson API</a>');
+      $("#a1").attr("href", geojson_url);
+      $("#a1").attr('title', geojson_url);
+
+      $('#subtitle2').html('<a id="a2" >Data Source</a>');
+      $("#a2").attr("href", dataSource_url);
+      $("#a2").attr('title', dataSource_url);
+
+      $('#subtitle3').text(instruction);
+
+      var map = L.map('map').setView([38.8929, -77.0252], 12);
+
+     // L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+      L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+        attribution: 'Tiles by <a href="http://mapc.org">MAPC</a>, Data by <a href="http://mass.gov/mgis">MassGIS</a>',
+        maxZoom: 17,
+        minZoom: 9
+    }).addTo(map);
+
+      // load GeoJSON from an external file use URL or use local geojson all work
+    $.getJSON(geojson_url, function (data) {
+        // add GeoJSON layer to the map once the file is loaded
+        var greenIcon = L.icon({
+            iconUrl: 'images/healthcare.png',
+            iconSize: [25, 25]
+        });
+
+          L.geoJson(data, {
+              pointToLayer: function (feature, latlng) {
+                  var marker = L.marker(latlng, { icon: greenIcon });
+                  marker.bindPopup("Name: " + feature.properties.PrimaryCarePtNAME + '<br/>' + "Address: " + feature.properties.PrimaryCarePtADDRESS + '<br/>' + "Phone: " + feature.properties.PrimaryCarePtPHONE);
+                  return marker;
+              }
+          }).addTo(map);
+      });
+
+  </script>
+</body>
+</html>

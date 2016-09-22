@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>DC Crime Incidents Viewer</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="config.js"></script>
+    <link rel="shortcut icon" href="http://atlasplus.dcgis.dc.gov/images/dclogo.ico" />
+    <link rel="stylesheet" type="text/css" href="css/cluster_dash.css" />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+    <style>
+        .panel2 {
+            position: absolute;
+            width: 250px;
+            opacity: 0.9;
+            right: 10px;
+            top: 10px;
+            z-index: 10;
+            background-color: #fff;
+            border-color: #50667f;
+            padding: 10px;
+        }
+
+        .form-control2 {
+            width: 180px;
+            height: 30px;
+        }
+
+        .btn-success {
+            background-color: #50667f;
+            border-color: #50667f;
+            color: #fff;
+            float: right;
+            height: 30px;
+        }
+
+        #downdiv {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id='map'></div>
+    <div class='map-overlay2'>
+        <div id="title" class="childbox1">
+        </div>
+        <div id="subtitle1" class="childbox2">
+        </div>
+        <div id="subtitle2" class="childbox2">
+        </div>
+        <div id="subtitle3" class="childbox2">
+        </div>
+    </div>
+    <div id="downdiv" class='map-overlay top'>
+        <div class='map-overlay-inner'>
+            <div id="download" class='blocker strong large pad0'>
+                <!--Downloading crime data...-->
+            </div>
+            <label id='month'></label>
+            <input id='slider' type='range' min='0' max='11' step='1' value='0' />
+        </div>
+    </div>
+
+    <div class="panel2">
+        <div class="form-group2">
+            <label>Search crime data</label>
+            <div>
+                <input type="text" class="form-control2" id="geoJsonUrl" value=" " placeholder="search crime data  ">
+                <button id="btnAdd" class="btn-success" type="button">Load</button>
+            </div>
+        </div>
+    </div>
+
+    <div id='legendDiv' class='legend'></div>
+
+    <div id="pieChart"></div>
+    <div id="barChart"></div>
+    <div id="lineChart"></div>
+
+    <script src='//d3js.org/d3.v3.min.js' charset='utf-8'></script>
+    <script type="text/javascript" src="js/opendata_js1.js"></script>
+    <script type="text/javascript" src="js/opendta_cluster.js"></script>
+    <script type="text/javascript" src="js/opendata_dash.js"></script>
+</body>
+</html>
